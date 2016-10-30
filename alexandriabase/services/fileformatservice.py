@@ -8,6 +8,7 @@ from PIL import Image  # @UnresolvedImport
 from injector import inject
 
 from alexandriabase import baseinjectorkeys
+import logging
 
 
 def get_graphic_file_resolution(file):
@@ -21,6 +22,9 @@ def get_graphic_file_resolution(file):
     x_res = file_info['dpi'][0]
     y_res = file_info['dpi'][1]
     if x_res != y_res:
+        logger = logging.getLogger()
+        logger.debug("X-Resolution is %d." % x_res)
+        logger.debug("Y-Resolution is %d." % y_res)
         raise DifferentXAndYResolutions(x_res, y_res)
     return x_res
 
