@@ -17,6 +17,61 @@ from reportlab.platypus.paragraph import Paragraph
 from alexandriabase import baseinjectorkeys
 from PyPDF2.merger import PdfFileMerger
 
+# Patching PyPDF2
+
+from PyPDF2.pdf import ContentStream
+from PyPDF2.generic import DictionaryObject, readObject
+from PyPDF2.utils import readNonWhitespace, b_
+import PyPDF2.utils as utils
+
+def readInlineImagePatch(self, stream):
+    # begin reading just after the "BI" - begin image
+    # first read the dictionary of settings.
+    settings = DictionaryObject()
+    while True:
+        tok = readNonWhitespace(stream)
+        stream.seek(-1, 1)
+        if tok == b_("I"):
+            # "ID" - begin of image data
+            break
+        key = readObject(stream, self.pdf)
+        tok = readNonWhitespace(stream)
+        stream.seek(-1, 1)
+        value = readObject(stream, self.pdf)
+        settings[key] = value
+    # left at beginning of ID
+    tmp = stream.read(3)
+    assert tmp[:2] == b_("ID")
+    #data = self._readImageData(stream)
+    data = self._readImagaDataFast(stream)
+    return {"settings": settings, "data": data}
+
+def readImagaDataFast(self, stream):
+    # We keep more than buffersize bytes in the buffer because the
+    # end of image sequence might overlap. So we search some data twice,
+    # but this is still far more effective than the old algorithm
+    buffersize = 1024 * 1024 # Extracting in megabyte chunks
+    buffertail = 256
+    regex = re.compile(b_("(.*?)(EI\\s+)Q\\s+"), re.DOTALL)
+    data = b_("")
+       
+    buffer = stream.read(buffersize+buffertail)
+       
+    while True:
+        match = regex.match(buffer)
+        if match:
+            data += buffer[:len(match.group(1))]
+            stream.seek(-1 * (len(buffer) - len(match.group(1)) - len(match.group(2))), 1)
+            return data
+        if len(buffer) < buffersize + buffertail: # We already have exhausted the stream
+            raise utils.PdfReadError("Didn't find end of image marker!")
+        data += buffer[:buffersize]
+        buffer = buffer[buffersize:] + stream.read(buffersize)
+
+ContentStream._readInlineImage = readInlineImagePatch
+ContentStream._readImageDataFast = readImagaDataFast 
+
+# End of patchinv PyPDF2
 
 LINES_ARE_PARAGRAPHS = 'Lines are paragraphs'
 EMPTY_LINES_ARE_SEPARATORS = 'Empty lines are separators'
