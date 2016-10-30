@@ -9,6 +9,7 @@ from injector import inject
 
 from alexandriabase import baseinjectorkeys
 import logging
+import math
 
 
 def get_graphic_file_resolution(file):
@@ -21,10 +22,10 @@ def get_graphic_file_resolution(file):
         return None
     x_res = file_info['dpi'][0]
     y_res = file_info['dpi'][1]
-    if x_res != y_res:
+    # Might be a problem with floats
+    if abs(x_res - y_res) >= 0.001:
         logger = logging.getLogger()
-        logger.debug("X-Resolution is %d." % x_res)
-        logger.debug("Y-Resolution is %d." % y_res)
+        logger.debug("Difference is %f." % abs(x_res - y_res))
         raise DifferentXAndYResolutions(x_res, y_res)
     return x_res
 
