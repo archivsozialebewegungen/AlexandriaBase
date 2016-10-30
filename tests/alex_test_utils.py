@@ -15,7 +15,6 @@ from alexandriabase.config import Config
 from alexandriabase.daos.metadata import ALEXANDRIA_METADATA
 from alexandriabase.services.creatorservice import CreatorService
 from alexandriabase.domain import DocumentFileInfo
-from distlib.locators import Page
 
 
 MODE_SIMPLE = "simple"
