@@ -162,7 +162,7 @@ class FileProviderTests(unittest.TestCase):
         
         self.assertEquals(b'\x89PNG\r\n', display_image[0:6])
 
-@unittest.skipUnless(os.path.basename(sys.argv[1]) == 'tests', "Running just on a complete test run")
+@unittest.skipUnless(os.path.basename(sys.argv[0]) == 'nosetests', "Running just on a complete test run")
 class PdfImageExtractorTests(unittest.TestCase):
     
     def setUp(self):
