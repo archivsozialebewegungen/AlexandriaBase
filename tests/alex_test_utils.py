@@ -15,6 +15,7 @@ from alexandriabase.config import Config
 from alexandriabase.daos.metadata import ALEXANDRIA_METADATA
 from alexandriabase.services.creatorservice import CreatorService
 from alexandriabase.domain import DocumentFileInfo
+import unittest
 
 
 MODE_SIMPLE = "simple"
@@ -141,14 +142,13 @@ class TestModule(Module):
                     ClassProvider(CreatorService),
                     scope=singleton)
 
-        
 def get_test_base_dir():
     this_module = get_test_base_dir.__module__
     return get_path_for_module(this_module)
 
-def get_test_class_dir(test_class):
-    this_module = test_class.__class__.__module__
-    return get_path_for_module(this_module)
+#def get_test_class_dir(test_class):
+#    this_module = test_class.__class__.__module__
+#    return get_path_for_module(this_module)
 
 def get_pdf_samples_dir():
     return os.path.join(get_testfiles_dir(), "pdf_samples")
