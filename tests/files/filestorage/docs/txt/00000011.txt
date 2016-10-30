@@ -1,0 +1,10 @@
+Dokument 10
+
+Unterüberschrift
+
+Die ist jetzt eine Textdatei mit mehreren Absätzen,
+die dann durch eine Leerzeile getrennt werden.
+
+Der zweite Absatz enthält auch einige Umlaute: äüüÄÖÜß,
+damit der encoding Teil getestet werden kann. Diese Datei
+wird als latin-1 gespeichert.

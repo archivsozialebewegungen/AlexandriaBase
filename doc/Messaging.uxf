@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="11.3">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>0</x>
+      <y>60</y>
+      <w>160</w>
+      <h>370</h>
+    </coordinates>
+    <panel_attributes>WindowsManager</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>350</x>
+      <y>210</y>
+      <w>250</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>Document/Event Window
+--
+stupid container with controls that
+send messages</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>130</x>
+      <y>210</y>
+      <w>240</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+sends messages
+</panel_attributes>
+    <additional_attributes>30;50;220;50</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>350</x>
+      <y>350</y>
+      <w>260</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>Document / Event Presenter
+--
+pulls data from the view and saves it
+fetches data and pushs it to the view</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>130</x>
+      <y>310</y>
+      <w>240</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+passes on messages
+</panel_attributes>
+    <additional_attributes>220;50;30;50</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>330</x>
+      <y>260</y>
+      <w>202</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Performs data changes</panel_attributes>
+    <additional_attributes>110;30;110;90</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>130</x>
+      <y>350</y>
+      <w>240</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+sends messages</panel_attributes>
+    <additional_attributes>30;50;220;50</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>350</x>
+      <y>70</y>
+      <w>210</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>Relations Widget
+--
+Has a view and a presenter part</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>130</x>
+      <y>50</y>
+      <w>240</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+sends messages</panel_attributes>
+    <additional_attributes>30;50;220;50</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>130</x>
+      <y>70</y>
+      <w>240</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+passes on messages
+</panel_attributes>
+    <additional_attributes>220;50;30;50</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>330</x>
+      <y>110</y>
+      <w>202</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.&gt;
+displayed in, but 
+independent of window</panel_attributes>
+    <additional_attributes>110;30;110;100</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.Text</type>
+    <coordinates>
+      <x>10</x>
+      <y>450</y>
+      <w>450</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>Messages are:
+Goto event relative
+Goto event absolute
+Goto document relative
+Goto document absolute
+
+Only the document / event presenter accept the relative messages
+The absolute messages are recognized by all relevant widgets
+and presenters</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

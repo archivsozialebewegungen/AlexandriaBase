@@ -1,0 +1,80 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: AlexandriaBase\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-05-29 13:17+0200\n"
+"PO-Revision-Date: 2016-05-29 13:24+0100\n"
+"Last-Translator: Michael Koltan <admin@archivsozialebewegungen.de>\n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.6.10\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: alexandriabase/services/eventservice.py:103
+#: alexandriabase/daos/eventtypedao.py:54
+msgid "Event types"
+msgstr "Ereignistypen"
+
+#: alexandriabase/domain.py:67 tests/test_domain_objects.py:264
+msgid "January"
+msgstr "Januar"
+
+#: alexandriabase/domain.py:67 tests/test_domain_objects.py:264
+msgid "February"
+msgstr "Februar"
+
+#: alexandriabase/domain.py:67
+msgid "March"
+msgstr "März"
+
+#: alexandriabase/domain.py:68
+msgid "April"
+msgstr "April"
+
+#: alexandriabase/domain.py:68
+msgid "May"
+msgstr "Mai"
+
+#: alexandriabase/domain.py:68
+msgid "June"
+msgstr "Juni"
+
+#: alexandriabase/domain.py:68
+msgid "July"
+msgstr "Juli"
+
+#: alexandriabase/domain.py:68
+msgid "August"
+msgstr "August"
+
+#: alexandriabase/domain.py:69
+msgid "September"
+msgstr "September"
+
+#: alexandriabase/domain.py:69
+msgid "October"
+msgstr "Oktober"
+
+#: alexandriabase/domain.py:69
+msgid "November"
+msgstr "November"
+
+#: alexandriabase/domain.py:70
+msgid "Dezember"
+msgstr "Dezember"
+
+#: alexandriabase/domain.py:417 tests/test_domain_objects.py:356
+msgid "New document"
+msgstr "Neues Dokument"
+
+#: alexandriabase/daos/systematicdao.py:52
+msgid "Archiv soziale Bewegungen"
+msgstr "Archiv Soziale Bewegungen"

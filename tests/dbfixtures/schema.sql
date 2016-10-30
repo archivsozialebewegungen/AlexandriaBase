@@ -1,0 +1,10 @@
+CREATE TABLE chrono (ereignis_id int, ende int, ereignis varchar, status_id int, erfasser_id int, aufnahme date, aenderung date, ort_id int);
+CREATE TABLE doktyp (id int, beschreibung varchar);
+CREATE TABLE dokument (hauptnr int, laufnr int, beschreibung varchar, dateityp varchar, standort varchar, seite int, zustand varchar, keywords varchar, aufnahme date, aenderung date, erfasser_id int, doktyp int, res int);
+CREATE TABLE dverweis (ereignis_id int, laufnr int);
+CREATE TABLE ereignistyp (haupt int, unter int, beschreibung varchar);
+CREATE TABLE erfasser (id int, name varchar, anzeige varchar);
+CREATE TABLE everweis (hauptid int, unterid int, ereignis_id int);
+CREATE TABLE systematik (sort int, punkt varchar, roemisch int, sub int, beschreibung varchar, textsort varchar);
+CREATE TABLE sverweis (systematik varchar, roemisch int, sub int, hauptnr int);
+CREATE TABLE qverweis (id1 int, id2 int);

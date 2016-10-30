@@ -1,0 +1,79 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-29 17:02+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: AlexandriaBase/alexandriabase/services/eventservice.py:103
+#: AlexandriaBase/alexandriabase/daos/eventtypedao.py:54
+msgid "Event types"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:67
+msgid "January"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:67
+msgid "February"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:67
+msgid "March"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:68
+msgid "April"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:68
+msgid "May"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:68
+msgid "June"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:68
+msgid "July"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:68
+msgid "August"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:69
+msgid "September"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:69
+msgid "October"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:69
+msgid "November"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:70
+msgid "Dezember"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/domain.py:418
+msgid "New document"
+msgstr ""
+
+#: AlexandriaBase/alexandriabase/daos/systematicdao.py:52
+msgid "Archiv soziale Bewegungen"
+msgstr ""

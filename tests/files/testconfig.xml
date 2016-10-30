@@ -1,0 +1,33 @@
+<?xml version = "1.0" encoding="UTF-8"?>
+<configuration>
+	<entry key="logdir">/tmp</entry>
+	<entry key="djangodb">/tmp/django.sqlite</entry>
+	<entry key="dbuser"></entry>
+	<entry key="dbpassword"></entry>
+	<entry key="dbhost"></entry>
+	<entry key="dbname">:memory:</entry>
+	<entry key="dbengine">sqlite</entry>
+	<entry key="dbport"></entry>
+	<entry key="documentbasedir"></entry>
+	<list key="documentarchives"></list>
+	<list key="filetypes">
+		<listentry>jpg</listentry>
+		<listentry>tif</listentry>
+		<listentry>gif</listentry>
+		<listentry>txt</listentry>
+		<listentry>mpg</listentry>
+		<listentry>mp4</listentry>
+		<listentry>mp3</listentry>
+		<listentry>wav</listentry>
+		<listentry>pdf</listentry>
+	</list>
+	<map key="fileviewers">
+		<mapentry key="default">tkgui.documentviewer.defaultviewer.DefaultViewer</mapentry>
+		<mapentry key="tif">tkgui.documentviewer.defaultviewer.DefaultViewer</mapentry>
+	</map>
+	<map key="filetypealiases">
+		<mapentry key="tiff">tif</mapentry>
+		<mapentry key="jpeg">jpg</mapentry>
+		<mapentry key="mpeg">mpg</mapentry>
+	</map>
+</configuration>

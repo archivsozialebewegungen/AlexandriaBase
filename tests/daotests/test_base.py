@@ -1,0 +1,169 @@
+'''
+Created on 11.10.2015
+
+@author: michael
+'''
+from injector import Injector
+from sqlalchemy.engine import create_engine
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.sql.expression import text
+import unittest
+
+from alex_test_utils import setup_database_schema, load_table_data, clear_table_data, \
+    TestEnvironment, MODE_SIMPLE, TestModule
+from alexandriabase import baseinjectorkeys, AlexBaseModule
+from alexandriabase.base_exceptions import NoSuchEntityException, DataError
+from alexandriabase.daos import DaoModule
+from alexandriabase.daos.basedao import EntityDao
+from alexandriabase.daos.creatordao import CreatorDao
+from alexandriabase.daos.metadata import EVENT_TABLE,\
+    EVENT_CROSS_REFERENCES_TABLE
+from alexandriabase.domain import Entity
+
+
+tables = ("erfasser", "ereignistyp", "doktyp", "chrono", "dokument", "dverweis",  
+          "everweis", "qverweis", "registry")
+
+
+class TestUnimplementedMethods(unittest.TestCase):
+    
+    def test_non_entity_table(self):
+        
+        exception_raised = False
+        try:
+            EntityDao(None, EVENT_CROSS_REFERENCES_TABLE)
+        except DataError:
+            exception_raised = True
+        self.assertTrue(exception_raised)
+
+    def test_generic_dao_row_to_entity(self):
+        
+        dao = EntityDao(None, EVENT_TABLE)
+        exception_raised = False
+        row = {}
+        try:
+            dao._row_to_entity(row)
+        except Exception:
+            exception_raised = True
+        self.assertTrue(exception_raised)
+        
+    def test_generic_dao_insert(self):
+        
+        dao = EntityDao(None, EVENT_TABLE)
+        exception_raised = False
+        try:
+            dao._insert(Entity())
+        except Exception:
+            exception_raised = True
+        self.assertTrue(exception_raised)
+
+    def test_generic_dao_update(self):
+        
+        dao = EntityDao(None, EVENT_TABLE)
+        exception_raised = False
+        try:
+            dao._update(Entity())
+        except Exception:
+            exception_raised = True
+        self.assertTrue(exception_raised)
+
+class TestDaoModuleConfiguration(unittest.TestCase):
+    
+    def setUp(self):
+        self.env = TestEnvironment(mode=MODE_SIMPLE)
+
+    def tearDown(self):
+        self.env.cleanup()
+            
+    def test_configuration(self):
+        
+        injector = Injector([
+                        TestModule(self.env),
+                        AlexBaseModule(),
+                        DaoModule()
+                         ])
+
+        # Try to get the database engine, which is the crucial part
+        injector.get(baseinjectorkeys.DBEngineKey)    
+        
+class DatabaseBaseTest(unittest.TestCase):
+
+    def setUp(self):
+        self.engine = create_engine('sqlite:///:memory:', echo=False) # @UnusedVariable
+        setup_database_schema(self.engine)
+        load_table_data(tables, self.engine)
+
+    def tearDown(self):
+        clear_table_data(tables, self.engine)
+        
+class RollbackTest(DatabaseBaseTest):
+    
+    def setUp(self):
+        DatabaseBaseTest.setUp(self)
+        self.dao = CreatorDao(self.engine)
+
+    def test_transaction_rollback(self):
+        
+        # Verify the erfasser table has an entry
+        erfasser = self.dao.get_by_id(1)
+        self.assertTrue(erfasser)
+        
+        exception_thrown = False
+        try:
+            self.dao.transactional(self._evil_function)
+        except:
+            exception_thrown = True
+        self.assertTrue(exception_thrown)
+        # Rollback should have happened, so the deletion of
+        # all erfasser entries should have been reversed
+        self.dao.clear_cache()
+        erfasser = self.dao.get_by_id(1)
+        self.assertTrue(erfasser)
+
+        exception_thrown = False
+        try:
+            self._evil_function()
+        except OperationalError:
+            exception_thrown = True
+        self.assertTrue(exception_thrown)
+        # Now there should have been no rollback, all erfasser entries
+        # should be gone
+        self.dao.clear_cache()
+        exception_thrown = False
+        try:
+            erfasser = self.dao.get_by_id(1)
+        except NoSuchEntityException:
+            exception_thrown = True
+        self.assertTrue(exception_thrown)
+        
+    def test_nested_transactions(self):
+        
+        self.transactional_function_ii()
+        self.dao.clear_cache()
+        creator = self.dao.get_by_id(1)
+        self.assertEqual("MAX MUSTERMANN", creator.name)    
+            
+    def transactional_function(self):
+        
+        self.dao.transactional(self.function)
+        
+    def function(self):
+        
+        self.dao.connection.execute(text("DELETE FROM erfasser"))        
+            
+    def transactional_function_ii(self):
+        
+        self.dao.transactional(self.function_ii)
+        
+    def function_ii(self):
+        self.transactional_function()
+        self.dao.connection.execute(text("INSERT INTO erfasser (id, name, anzeige) VALUES (1, 'MAX MUSTERMANN', 1)"))        
+
+    def _evil_function(self):
+        
+        self.dao.connection.execute(text("DELETE FROM erfasser"))
+        self.dao.connection.execute(text("DELETE FROM nonexistingtable"))
+
+if __name__ == "__main__":
+    # import sys;sys.argv = ['', 'Test.testName']
+    unittest.main()

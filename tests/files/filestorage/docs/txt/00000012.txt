@@ -1,0 +1,10 @@
+Dokument 11
+Unterüberschrift
+Die ist jetzt eine Textdatei mit mehreren Absätzen,
+die Trennung der Absätze wird dadurch erzielt, daß
+die letzte Zeile des Absatzes deutlich kürzer ist als
+die vorigen.
+Der zweite Absatz enthält auch einige Umlaute: äüüÄÖÜß,
+damit der encoding Teil getestet werden kann. Diese Datei
+wird als latin-1 gespeichert.
+Das ist natürlich nicht unbedingt optimal.

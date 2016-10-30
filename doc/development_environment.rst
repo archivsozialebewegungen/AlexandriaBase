@@ -1,0 +1,4 @@
+Dependencies for development
+############################
+
+pylint

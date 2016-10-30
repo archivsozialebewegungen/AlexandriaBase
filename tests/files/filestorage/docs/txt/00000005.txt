@@ -1,0 +1,5 @@
+Dokument 5
+
+Unterüberschrift
+
+Die ist jetzt eine Textdatei mit einem ganz langen Absatz, der aus einer einzigen Zeile besteht. Und diese Zeile enthält auch einige Umlaute: äüüÄÖÜß, damit der encoding Teil getestet werden kann. Diese Datei wird als utf-8 gespeichert.

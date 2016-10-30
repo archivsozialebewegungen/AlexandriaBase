@@ -1,0 +1,6 @@
+injector>=0.9
+pmw>=2.0
+sqlalchemy>=1.0
+reportlab>=3.1
+psycopg2>=2.5
+pyPDF2

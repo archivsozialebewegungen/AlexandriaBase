@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>0</x>
+      <y>0</y>
+      <w>280</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>FileProvider
+--
+get_pdf(Document)
+get_thumbnail(DocumentFileInfo)
+get_display_image(DocumentFileInfo)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>330</x>
+      <y>0</y>
+      <w>350</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>PdfGenerator
+--
+generate_document_pdf(Document)
+generate_document_file_pdf(DocumentFileInfo)
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>0</x>
+      <y>160</y>
+      <w>510</w>
+      <h>170</h>
+    </coordinates>
+    <panel_attributes>DocumentFileManager
+--
+get_file_path(DocumentFileInfoInfo): String
+get_file(DocumentFileInfo): File
+add_file(Path, DocumentFileInfo)
+delete_file(DocumentFileInfo)
+get_generated_file_path(DocumentFileInfo, GenerationType): String
+get_generated_file(DocumentFileInfo, GenerationType): File or Image
+add_generated_file(File or Image, DocumentFileInfo, GenerationType)
+delete_generated_file(DocumentFileInfo, GenerationType)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>330</x>
+      <y>80</y>
+      <w>350</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>ImageGenerator
+--
+generate_image(DocumentFileInfo): Image</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>100</x>
+      <y>90</y>
+      <w>30</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>270</x>
+      <y>30</y>
+      <w>80</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;60.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>270</x>
+      <y>80</y>
+      <w>80</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;60.0;10.0</additional_attributes>
+  </element>
+</diagram>
