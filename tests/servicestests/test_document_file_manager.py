@@ -113,6 +113,7 @@ class FileProviderTests(unittest.TestCase):
         
         self.assertEquals(b'\x89PNG\r\n', thumbnail[0:6])
 
+    @unittest.skipIf(os.path.basename(sys.argv[0]) == 'nosetests', "Can't run on travis because ffmpeg needs to be installed")
     def test_thumbnail_generation_mpg(self):
 
         thumbnail = self.file_provider.get_thumbnail(self.env.document_file_infos[13])
