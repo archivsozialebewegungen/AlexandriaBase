@@ -22,10 +22,10 @@ def get_graphic_file_resolution(file):
         return None
     x_res = file_info['dpi'][0]
     y_res = file_info['dpi'][1]
-    # Might be a problem with floats
-    if abs(x_res - y_res) >= 0.001:
-        logger = logging.getLogger()
-        logger.debug("Difference is %f." % abs(x_res - y_res))
+    # In newer versions of Pillow the resolution
+    # is an object of type IFDRational that is
+    # not simply comparable - equality checks for identity
+    if "%s" % x_res != "%s" % y_res:
         raise DifferentXAndYResolutions(x_res, y_res)
     return x_res
 
