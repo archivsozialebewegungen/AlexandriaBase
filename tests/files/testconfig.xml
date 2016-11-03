@@ -21,7 +21,7 @@
 		<listentry>wav</listentry>
 		<listentry>pdf</listentry>
 	</list>
-	<map key="fileviewers">
+	<map key="filetypeviewers">
 		<mapentry key="default">tkgui.documentviewer.defaultviewer.DefaultViewer</mapentry>
 		<mapentry key="tif">tkgui.documentviewer.defaultviewer.DefaultViewer</mapentry>
 	</map>
@@ -30,4 +30,6 @@
 		<mapentry key="jpeg">jpg</mapentry>
 		<mapentry key="mpeg">mpg</mapentry>
 	</map>
+	<list key="additional_modules">
+	</list>
 </configuration>
