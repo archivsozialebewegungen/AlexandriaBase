@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/archivsozialebewegungen/AlexandriaBase.svg?branch=master)](https://travis-ci.org/archivsozialebewegungen/AlexandriaBase)
+
 # AlexandriaBase
 
 This is the first open source part of the Alexandria
