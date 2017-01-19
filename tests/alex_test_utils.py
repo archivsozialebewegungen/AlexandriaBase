@@ -15,8 +15,7 @@ from alexandriabase.config import Config
 from alexandriabase.daos.metadata import ALEXANDRIA_METADATA
 from alexandriabase.services.creatorservice import CreatorService
 from alexandriabase.domain import DocumentFileInfo
-import unittest
-from django.core.files.temp import NamedTemporaryFile
+from tempfile import NamedTemporaryFile
 
 
 MODE_SIMPLE = "simple"
