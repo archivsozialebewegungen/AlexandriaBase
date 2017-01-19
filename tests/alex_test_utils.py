@@ -16,6 +16,7 @@ from alexandriabase.daos.metadata import ALEXANDRIA_METADATA
 from alexandriabase.services.creatorservice import CreatorService
 from alexandriabase.domain import DocumentFileInfo
 import unittest
+from django.core.files.temp import NamedTemporaryFile
 
 
 MODE_SIMPLE = "simple"
@@ -188,3 +189,10 @@ def load_table_data(tables, engine):
 def clear_table_data(tables, engine):
     for table in tables:
         clear_table(table, engine)
+        
+def create_temporary_test_file_name():
+    
+    test_file = NamedTemporaryFile()
+    test_file_name = test_file.name
+    test_file.close()
+    return test_file_name
