@@ -15,7 +15,7 @@ class DocumentTypeServiceTest(unittest.TestCase):
 
     def setUp(self):
         self.document_type_dao = MagicMock(spec=DocumentTypeDao)
-        self.doc_type = DocumentType()
+        self.doc_type = DocumentType(1)
         self.doc_type.description = "My description"
         
         self.document_type_service = DocumentTypeService(self.document_type_dao)
@@ -29,6 +29,12 @@ class DocumentTypeServiceTest(unittest.TestCase):
         self.document_type_dao.get_all = Mock(return_value=(self.doc_type,))
         types = self.document_type_service.get_document_type_dict()
         self.assertEqual('My description', types['MY DESCRIPTION'].description)
+        self.document_type_dao.get_all.assert_called_once_with()
+        
+    def test_get_document_types(self):
+        self.document_type_dao.get_all = Mock(return_value=(self.doc_type,))
+        types = self.document_type_service.get_document_types()
+        self.assertEqual('My description', types[1])
         self.document_type_dao.get_all.assert_called_once_with()
         
     def test_get_by_id(self):

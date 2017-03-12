@@ -29,6 +29,18 @@ class DocumentTypeService(object):
         for document_type in types:
             type_dict[document_type.description.upper()] = document_type
         return type_dict
+
+    def get_document_types(self):
+        '''
+        Returns all document types as a dictionary with
+        the document type id as key and the document type description
+        as value.
+        '''
+        type_dict = {}
+        types = self.document_type_dao.get_all()
+        for document_type in types:
+            type_dict[document_type.id] = document_type.description
+        return type_dict
     
     def get_by_id(self, doc_type_id):
         '''
