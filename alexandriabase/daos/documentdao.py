@@ -27,6 +27,7 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         super()._create_expressions(document_filter)
         self._append_expression(self._build_location_expression(document_filter))
         self._append_expression(self._build_filetype_expression(document_filter))
+        self._append_expression(self._build_document_type_expression(document_filter))
 
     def _build_location_expression(self, document_filter):
         '''
@@ -43,6 +44,15 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         if not document_filter.filetype:
             return None
         subquery = select([self.table.c.hauptnr]).where(self.table.c.dateityp == document_filter.filetype)
+        return self.table.c.hauptnr.in_(subquery)
+
+    def _build_document_type_expression(self, document_filter):
+        '''
+        Creates a filetype expression.
+        '''
+        if not document_filter.document_type:
+            return None
+        subquery = select([self.table.c.hauptnr]).where(self.table.c.doktyp == document_filter.document_type)
         return self.table.c.hauptnr.in_(subquery)
 
 class DocumentDao(EntityDao):

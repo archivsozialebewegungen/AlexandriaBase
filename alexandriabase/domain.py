@@ -282,6 +282,7 @@ class DocumentFilter(GenericFilter):
         super().__init__()
         self.location = None
         self.filetype = None
+        self.document_type = None
 
 class EventFilter(GenericFilter):
     '''

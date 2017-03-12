@@ -240,6 +240,16 @@ class TestDocumentDao(DatabaseBaseTest):
         self.assertEqual(12, document.id)
         document = self.dao.get_next(document, filter_expression)
         self.assertEqual(4, document.id)
+        
+    def testDocumentTypeFiltering(self):
+        
+        document_filter = DocumentFilter()
+        document_filter.document_type = 13
+        filter_expression = self.document_filter_handler.create_filter_expression(document_filter)
+        document = self.dao.get_last(filter_expression)
+        self.assertEqual(12, document.id)
+        document = self.dao.get_next(document, filter_expression)
+        self.assertEqual(11, document.id)
 
     def testCombinedFiltering(self):
         document_filter = DocumentFilter()
