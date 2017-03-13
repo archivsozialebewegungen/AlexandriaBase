@@ -77,7 +77,7 @@ class FileProviderTests(unittest.TestCase):
         
         pdf = self.file_provider.get_pdf(document)
         self.assertFalse(pdf is None)
-        self.assertEquals(b'%PDF-1.3\r\n', pdf[0:10])
+        self.assertEquals(b'%PDF-1.3', pdf[0:8])
         
         self.assertTrue(os.path.exists(cache_path))
         
