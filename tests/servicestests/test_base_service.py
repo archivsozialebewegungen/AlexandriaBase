@@ -29,7 +29,7 @@ class TestDaoModuleConfiguration(unittest.TestCase):
                         TestModule(self.env),
                         AlexBaseModule(),
                         DaoModule(),
-                        ServiceModule
+                        ServiceModule()
                          ])
 
         # Try to get the database engine, which is the crucial part
