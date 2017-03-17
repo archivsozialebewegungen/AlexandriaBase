@@ -26,6 +26,7 @@ class TestEnvironment():
     def __init__(self, mode=MODE_SIMPLE):
         self.tmpdir = tempfile.TemporaryDirectory()
         self.config_file_name = os.path.join(self.tmpdir.name, "config.xml")
+        os.environ['ALEX_CONFIG'] = self.config_file_name
 
         config_file = os.path.join(get_testfiles_dir(), "testconfig.xml")
         self.config = Config(config_file)
@@ -180,6 +181,9 @@ def setup_database_schema(engine):
     #load_fixture("schema", engine)
     ALEXANDRIA_METADATA.create_all(engine)
 
+def drop_database_schema(engine):
+    #load_fixture("schema", engine)
+    ALEXANDRIA_METADATA.drop_all(engine)
 
 def load_table_data(tables, engine):
     for table in tables:
