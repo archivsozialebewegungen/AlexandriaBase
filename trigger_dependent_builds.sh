@@ -5,6 +5,8 @@ body='{
   "branch":"master"
 }}'
 
+echo AUTH_TOKEN: ${AUTH_TOKEN}
+
 curl -s -X POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
