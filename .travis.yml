@@ -7,7 +7,7 @@ install: pip install -r requirements.txt
 script: nosetests tests
 after_success:
   # only execute gui build once per build
-  if [ "${TRAVIS_PYTHON_VERSION}" = "3.6" ]; then sh ./trigger_dependent_builds.sh; fi
+  echo ${TRAVIS_PYTHON_VERSION}; MAJOR_VERSION=`echo ${TRAVIS_PYTHON_VERSION} | cut -b 1-3`; if [ "${MAJOR_VERSION}" = "3.6" ]; then sh ./trigger_dependent_builds.sh; fi
 env:
   global:
     secure: OFXKVICv3/Qi0lKxfyuWnKLa233Lf+keqhfrKYvNqDy077Yk5dx3RIuBfohx4Y3Au6xIA0ytioV39CS2chlvn3zqlSfwuNbGQ6QZNKNwqFVwjhI+gNRwyh3yTZBzvoFiWecnnfDVw0pMwOQK2XBfBXmzhjeq2Gux/i2PoBrRCyeXIfLqu+ncw1ybrENMp2F4GJYV49SzDnL3QDt2bt1NmLAqmu6OaD/I2S3g7PJMIlMRf5g+fV4X8CUoFA0FYK+lxeGqX0gpEG2ceTN+W7sDdWOIvkV5iL/Mjp5rsJsq51AtHpJBQzxeueZVhBfm+ZrJzY7mv5EGi4rirkOdEHUaxhqVl2d4fF+sEms881W97/aoyYXOTp9IkrqCT5hvmQySjVhkAZd79LpDEX4kXy9edycekBy2ntbSsRKBmZrAvWK/x5qpqphXI55J23ZbfAvTT7HY4YQCsC6+mLpFLIbx/mp4v6mC1yxGa68kqCnBNqRGy+IIRzvlu2bCUcxt3MPk282lZjDahKconH877R8LNoxjvnKQgwDAZM74M8h6n+JgSmxucEzvWzqR1pJIdmaFYWH1Hd6X9nEFXPSg5GwnCmUy8QqIardgCQLOqx/RWOueHcVcehiD+RAhzD4YaQGoxMV8P0dPm5UduzVvyfsPWfXcMK2UrPVEM8uTwL+IM8s=
