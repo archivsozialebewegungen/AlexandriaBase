@@ -5,9 +5,8 @@ python:
 - '3.6'
 install: pip install -r requirements.txt
 script: nosetests tests
-after_success:
-  # only execute gui build once per build
-  if [ "${TRAVIS_PYTHON_VERSION}" = "3.6" ]; then ./trigger_dependent_builds.sh; fi
+after_success: if [ "${TRAVIS_PYTHON_VERSION}" = "3.6" ]; then ./trigger_dependent_builds.sh;
+  fi
 env:
   global:
-    secure: OFXKVICv3/Qi0lKxfyuWnKLa233Lf+keqhfrKYvNqDy077Yk5dx3RIuBfohx4Y3Au6xIA0ytioV39CS2chlvn3zqlSfwuNbGQ6QZNKNwqFVwjhI+gNRwyh3yTZBzvoFiWecnnfDVw0pMwOQK2XBfBXmzhjeq2Gux/i2PoBrRCyeXIfLqu+ncw1ybrENMp2F4GJYV49SzDnL3QDt2bt1NmLAqmu6OaD/I2S3g7PJMIlMRf5g+fV4X8CUoFA0FYK+lxeGqX0gpEG2ceTN+W7sDdWOIvkV5iL/Mjp5rsJsq51AtHpJBQzxeueZVhBfm+ZrJzY7mv5EGi4rirkOdEHUaxhqVl2d4fF+sEms881W97/aoyYXOTp9IkrqCT5hvmQySjVhkAZd79LpDEX4kXy9edycekBy2ntbSsRKBmZrAvWK/x5qpqphXI55J23ZbfAvTT7HY4YQCsC6+mLpFLIbx/mp4v6mC1yxGa68kqCnBNqRGy+IIRzvlu2bCUcxt3MPk282lZjDahKconH877R8LNoxjvnKQgwDAZM74M8h6n+JgSmxucEzvWzqR1pJIdmaFYWH1Hd6X9nEFXPSg5GwnCmUy8QqIardgCQLOqx/RWOueHcVcehiD+RAhzD4YaQGoxMV8P0dPm5UduzVvyfsPWfXcMK2UrPVEM8uTwL+IM8s=
+    secure: zUl7U9rMQyCGsZOEDDLPJld+mJGT90sjUJi5ozM2YFlzSlxJ1cTqEF1KtmJnrz3Gp/GH+zCZMzQJ7xnb9OMyDKX0SyddWMxVvyHB4lBe1kNfkU/lBoEjNA9oPYdgAYEHgYXkXuC1PI2GFCaUnydsIZ7ywN0k/P+NY8emS/IAvRqxowqQ/+Oz665mUNuvENG/RbDFr+1t/kEimwzej/6mJyZckHg9lRap59h41eze/RK2LlQF6YbCRelKv1EISdLCaiDAF2MdwizylZ2SMh9wgfd+t598bmsWehqTA30t+RGQVkxqacilZKCdFc3V94R0usujEn1zigyee9RRr/mEmMLgOorpqgpz0ax02ejPlsw8xoiq+NYGVFs87Ist/pU2+SwBF4XUxsytnSXHHrnhk7ejyS5rtan7eg+GgfJSGSId5SCtVk5yPle4RTUutknftafqCAmYHcT7tBEj1y+TRjQ6ippJsXuVDR2ECu67efoyurxbud7RHljwmHaQYKH/5p9ENfyxavh2os+RA9rsfLfD1vhG9DeW4oTBUeDJF5ax8mLUv00cSSS/kz04HPYWLLX95LLBTwxAWHEgWnFHA45Sf7puwkYKCWm9NzYaq+FU0v54eQDKVO2pJeYgOacVlSP0LKbITP9/V88VGRLI8mqSqCEYAs96/ROkwKf3480=
