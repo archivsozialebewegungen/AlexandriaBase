@@ -5,7 +5,7 @@ body='{
   "branch":"master"
 }}'
 
-for PROJECT in AlexandriaGui AlexandriaPlugins AlexandriaWeb; do
+for PROJECT in ${DEPENDENT_PROJECTS}; do
 curl -s -X POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
