@@ -4,7 +4,7 @@ Created on 11.10.2015
 @author: michael
 '''
 from injector import inject
-from sqlalchemy.sql.expression import select, and_, delete, update, insert
+from sqlalchemy.sql.expression import select, and_, delete, update, insert, or_
 from sqlalchemy.sql.functions import func
 
 from alexandriabase import baseinjectorkeys
@@ -35,7 +35,8 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         '''
         if not document_filter.location:
             return None
-        return self.table.c.standort.startswith(document_filter.location)
+        return or_(self.table.c.standort == document_filter.location,
+                   self.table.c.standort.startswith("%s." % document_filter.location))
 
     def _build_filetype_expression(self, document_filter):
         '''
