@@ -4,7 +4,7 @@ Created on 11.10.2015
 @author: michael
 '''
 from injector import inject
-from sqlalchemy.sql.expression import select, insert, and_, delete, update
+from sqlalchemy.sql.expression import select, insert, and_, delete, update, or_
 from sqlalchemy.sql.functions import func
 
 from alexandriabase import baseinjectorkeys
@@ -80,8 +80,17 @@ class DocumentEventRelationsDao(GenericDao):
                  self.deref_table.c.laufnr == document_id))  
         self._get_connection().execute(delete_statement)
 
-    def fetch_doc_event_references(self, start_date=None, end_date=None, location=None):
 
+    # TODO: Eliminate this method
+    def fetch_doc_event_references(self, start_date=None, end_date=None, location=None):
+        '''
+        Fetches document event references according to date / location criteria.
+        This method is doomed. It relies on the event id coding the date of the
+        event. This should vanish in in database version 1.0.
+        Also it duplicats code from the document filter class. All selection
+        stuff should move to the document filter class that builds a where
+        expression.
+        '''
         join = self.doc_table.outerjoin(
             self.deref_table,
             self.doc_table.c.hauptnr == self.deref_table.c.laufnr)        
@@ -94,7 +103,8 @@ class DocumentEventRelationsDao(GenericDao):
         if end_date is not None:
             where_clauses.append(self.deref_table.c.ereignis_id < end_date.as_key(0)+100)
         if location is not None:
-            where_clauses.append(self.doc_table.c.standort.ilike("%s%%" % location))
+            where_clauses.append(or_(self.doc_table.c.standort == location,
+                                     self.doc_table.c.standort.startswith("%s." % location)))
         if len(where_clauses) > 0:
             query = query.where(combine_expressions(where_clauses, and_))
 
