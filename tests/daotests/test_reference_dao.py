@@ -118,11 +118,9 @@ class TestRelationsDao(DatabaseBaseTest):
     def test_fetch_doc_and_event_ids_VI(self):
         
         references = self.dao.fetch_doc_event_references(location='1.1.I')
-        self.assertEqual(2, len(references.keys()))
-        self.assertEqual(2, len(references[4]))
-        self.assertIn(1940000001, references[4])
-        self.assertIn(1960013001, references[4])
-        self.assertIn(4, references)
+        self.assertEqual(1, len(references.keys()))
+        self.assertEqual(1, len(references[1]))
+        self.assertIn(1940000001, references[1])
         self.assertIn(1, references)
 
 if __name__ == "__main__":

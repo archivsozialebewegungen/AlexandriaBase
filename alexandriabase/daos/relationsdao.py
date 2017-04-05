@@ -103,8 +103,9 @@ class DocumentEventRelationsDao(GenericDao):
         if end_date is not None:
             where_clauses.append(self.deref_table.c.ereignis_id < end_date.as_key(0)+100)
         if location is not None:
-            where_clauses.append(or_(self.doc_table.c.standort == location,
-                                     self.doc_table.c.standort.startswith("%s." % location)))
+            uc_location = location.upper()
+            where_clauses.append(or_(self.doc_table.c.standort == uc_location,
+                                     self.doc_table.c.standort.startswith("%s." % uc_location)))
         if len(where_clauses) > 0:
             query = query.where(combine_expressions(where_clauses, and_))
 
