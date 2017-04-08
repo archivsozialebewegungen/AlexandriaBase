@@ -150,7 +150,7 @@ class GenericDao:
         result.close()
 
         if not row:
-            raise NoSuchEntityException("Did not find entity!")
+            raise NoSuchEntityException("Did not find entity for query '%s'" % query)
 
         return row
 
