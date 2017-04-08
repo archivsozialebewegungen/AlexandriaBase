@@ -8,15 +8,17 @@ import unittest
 
 from alexandriabase.daos.metadata import DOCUMENT_TABLE
 from alexandriabase.daos.relationsdao import DocumentEventRelationsDao
-from alexandriabase.domain import AlexDate
+from alexandriabase.domain import AlexDate, DocumentEventReferenceFilter
 from daotests.test_base import DatabaseBaseTest
+from alexandriabase.daos.documentdao import DocumentFilterExpressionBuilder
+from alexandriabase.daos.eventdao import EventFilterExpressionBuilder
 
 
 class TestRelationsDao(DatabaseBaseTest):
     
     def setUp(self):
         super().setUp()
-        self.dao = DocumentEventRelationsDao(self.engine)
+        self.dao = DocumentEventRelationsDao(self.engine, DocumentFilterExpressionBuilder(), EventFilterExpressionBuilder())
         
     def tearDown(self):
         super().tearDown()
@@ -77,13 +79,15 @@ class TestRelationsDao(DatabaseBaseTest):
 
     def test_fetch_doc_and_event_ids_I(self):
         
-        references = self.dao.fetch_doc_event_references()
+        references = self.dao.fetch_doc_event_references(DocumentEventReferenceFilter())
         self.assertEqual(7, len(references.keys()))
         self.assertEqual(2, len(references[4]))
 
     def test_fetch_doc_and_event_ids_II(self):
         
-        references = self.dao.fetch_doc_event_references(start_date=AlexDate(1950))
+        der_filter = DocumentEventReferenceFilter()
+        der_filter.earliest_date = AlexDate(1950)
+        references = self.dao.fetch_doc_event_references(der_filter)
         self.assertEqual(1, len(references.keys()))
         self.assertEqual(1, len(references[4]))
         self.assertIn(1960013001, references[4])
@@ -91,7 +95,9 @@ class TestRelationsDao(DatabaseBaseTest):
 
     def test_fetch_doc_and_event_ids_III(self):
         
-        references = self.dao.fetch_doc_event_references(end_date=AlexDate(1950))
+        der_filter = DocumentEventReferenceFilter()
+        der_filter.latest_date = AlexDate(1950)
+        references = self.dao.fetch_doc_event_references(der_filter)
         self.assertEqual(2, len(references.keys()))
         self.assertEqual(1, len(references[1]))
         self.assertEqual(1, len(references[4]))
@@ -102,13 +108,18 @@ class TestRelationsDao(DatabaseBaseTest):
 
     def test_fetch_doc_and_event_ids_IV(self):
         
-        references = self.dao.fetch_doc_event_references(start_date=AlexDate(1945),
-                                                                   end_date=AlexDate(1950))
+        der_filter = DocumentEventReferenceFilter()
+        der_filter.earliest_date = AlexDate(1945)
+        der_filter.latest_date = AlexDate(1950)
+
+        references = self.dao.fetch_doc_event_references(der_filter)
         self.assertEqual(0, len(references.keys()))
     
     def test_fetch_doc_and_event_ids_V(self):
         
-        references = self.dao.fetch_doc_event_references(location='1.1.ii')
+        der_filter = DocumentEventReferenceFilter()
+        der_filter.location='1.1.ii'
+        references = self.dao.fetch_doc_event_references(der_filter)
         self.assertEqual(1, len(references.keys()))
         self.assertEqual(2, len(references[4]))
         self.assertIn(1940000001, references[4])
@@ -117,7 +128,9 @@ class TestRelationsDao(DatabaseBaseTest):
 
     def test_fetch_doc_and_event_ids_VI(self):
         
-        references = self.dao.fetch_doc_event_references(location='1.1.I')
+        der_filter = DocumentEventReferenceFilter()
+        der_filter.location='1.1.I'
+        references = self.dao.fetch_doc_event_references(der_filter)
         self.assertEqual(1, len(references.keys()))
         self.assertEqual(1, len(references[1]))
         self.assertIn(1940000001, references[1])

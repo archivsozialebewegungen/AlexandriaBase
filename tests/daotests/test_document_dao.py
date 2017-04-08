@@ -11,7 +11,7 @@ from alexandriabase.daos.creatordao import CreatorDao
 from alexandriabase.daos.documentdao import DocumentDao, \
     DocumentFilterExpressionBuilder
 from alexandriabase.daos.documenttypedao import DocumentTypeDao
-from alexandriabase.daos.eventdao import EventDao
+from alexandriabase.daos.eventdao import EventDao, EventFilterExpressionBuilder
 from alexandriabase.daos.eventtypedao import EventTypeDao
 from alexandriabase.domain import Document, DocumentFilter
 from daotests.test_base import DatabaseBaseTest
@@ -31,7 +31,9 @@ class TestDocumentDao(DatabaseBaseTest):
         config_file = os.path.join(get_testfiles_dir(), "testconfig.xml")
         self.config = Config(config_file)
         self.creator_dao = CreatorDao(self.engine)
-        self.references_dao = DocumentEventRelationsDao(self.engine)
+        self.references_dao = DocumentEventRelationsDao(self.engine,
+                                                        DocumentFilterExpressionBuilder(),
+                                                        EventFilterExpressionBuilder())
         self.eventtype_dao = EventTypeDao(self.engine)
         self.doc_type_dao = DocumentTypeDao(self.engine)
         creator_provider = BasicCreatorProvider(self.creator_dao)

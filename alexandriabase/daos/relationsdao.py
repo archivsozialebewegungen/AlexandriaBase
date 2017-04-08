@@ -9,18 +9,25 @@ from sqlalchemy.sql.functions import func
 
 from alexandriabase import baseinjectorkeys
 from alexandriabase.daos.basedao import GenericDao, combine_expressions
-from alexandriabase.daos.metadata import DOCUMENT_EVENT_REFERENCE_TABLE, DOCUMENT_TABLE
+from alexandriabase.daos.metadata import DOCUMENT_EVENT_REFERENCE_TABLE, DOCUMENT_TABLE,\
+    EVENT_TABLE
+from alexandriabase.domain import EventFilter, DocumentFilter
 
 class DocumentEventRelationsDao(GenericDao):
     '''
     Handles all kinds of relations
     '''
     
-    @inject(db_engine=baseinjectorkeys.DBEngineKey)
-    def __init__(self, db_engine):
+    @inject(db_engine=baseinjectorkeys.DBEngineKey,
+            document_filter_expression_builder=baseinjectorkeys.DocumentFilterExpressionBuilderKey,
+            event_filter_expression_builder=baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY)
+    def __init__(self, db_engine, document_filter_expression_builder, event_filter_expression_builder):
         super().__init__(db_engine)
         self.deref_table = DOCUMENT_EVENT_REFERENCE_TABLE
         self.doc_table = DOCUMENT_TABLE
+        self.event_table = EVENT_TABLE
+        self.document_filter_expression_builder = document_filter_expression_builder
+        self.event_filter_expression_builder = event_filter_expression_builder
         
     # TODO: clean up the references and use pages instead of file ids
     def fetch_doc_file_ids_for_event_id(self, event_id):
@@ -79,33 +86,32 @@ class DocumentEventRelationsDao(GenericDao):
             and_(self.deref_table.c.ereignis_id == event_id,  
                  self.deref_table.c.laufnr == document_id))  
         self._get_connection().execute(delete_statement)
-
-
-    # TODO: Eliminate this method
-    def fetch_doc_event_references(self, start_date=None, end_date=None, location=None):
+    
+    def fetch_doc_event_references(self, document_event_reference_filter):
         '''
-        Fetches document event references according to date / location criteria.
-        This method is doomed. It relies on the event id coding the date of the
-        event. This should vanish in in database version 1.0.
-        Also it duplicats code from the document filter class. All selection
-        stuff should move to the document filter class that builds a where
-        expression.
+        Fetches a dictionary with document ids as keys and and arrays of
+        event ids as values for certain filter criteria. The event array
+        may be empty if there are no event criteria in the given filter.
+        
+        The filter is a combination of a document and an event filter. The
+        document and the event criteria are joined with `and`.
         '''
+        
         join = self.doc_table.outerjoin(
             self.deref_table,
-            self.doc_table.c.hauptnr == self.deref_table.c.laufnr)        
+            self.deref_table.c.laufnr == self.doc_table.c.hauptnr).outerjoin(
+            self.event_table,
+            self.event_table.c.ereignis_id == self.deref_table.c.ereignis_id)        
         query = select([self.doc_table.c.hauptnr, self.deref_table.c.ereignis_id]).distinct().select_from(join)
         where_clauses = []
-        if end_date is not None or start_date is not None:
-            where_clauses.append(self.deref_table.c.ereignis_id != None)
-        if start_date is not None:
-            where_clauses.append(self.deref_table.c.ereignis_id >= start_date.as_key(0))
-        if end_date is not None:
-            where_clauses.append(self.deref_table.c.ereignis_id < end_date.as_key(0)+100)
-        if location is not None:
-            uc_location = location.upper()
-            where_clauses.append(or_(self.doc_table.c.standort == uc_location,
-                                     self.doc_table.c.standort.startswith("%s." % uc_location)))
+        
+        event_where = self.event_filter_expression_builder.create_filter_expression(document_event_reference_filter)
+        if event_where is not None:
+            where_clauses.append(event_where)
+        document_where = self.document_filter_expression_builder.create_filter_expression(document_event_reference_filter)
+        if document_where is not None:
+            where_clauses.append(document_where)
+        
         if len(where_clauses) > 0:
             query = query.where(combine_expressions(where_clauses, and_))
 
@@ -119,7 +125,7 @@ class DocumentEventRelationsDao(GenericDao):
                 references[document_id].append(event_id)
             
         return references
-    
+
     def fetch_ereignis_ids_for_dokument_id(self, dokument_id):
         '''
         Does what the method name says.

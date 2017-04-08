@@ -9,7 +9,8 @@ import unittest
 from alexandriabase.base_exceptions import NoSuchEntityException
 from alexandriabase.daos.basiccreatorprovider import BasicCreatorProvider
 from alexandriabase.daos.creatordao import CreatorDao
-from alexandriabase.daos.documentdao import DocumentDao
+from alexandriabase.daos.documentdao import DocumentDao,\
+    DocumentFilterExpressionBuilder
 from alexandriabase.daos.documenttypedao import DocumentTypeDao
 from alexandriabase.daos.eventdao import EventDao, \
     EventFilterExpressionBuilder
@@ -26,7 +27,9 @@ class TestEreignisDao(DatabaseBaseTest):
         super().setUp()
         erfasser_dao = CreatorDao(self.engine)
         document_type_dao = DocumentTypeDao(self.engine)
-        self.references_dao = DocumentEventRelationsDao(self.engine)
+        self.references_dao = DocumentEventRelationsDao(self.engine,
+                                                        DocumentFilterExpressionBuilder(),
+                                                        EventFilterExpressionBuilder())
         ereignistyp_dao = EventTypeDao(self.engine)
         creator_provider = BasicCreatorProvider(erfasser_dao)
         self.dao = EventDao(self.engine,

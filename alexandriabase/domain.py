@@ -283,6 +283,8 @@ class DocumentFilter(GenericFilter):
         self.location = None
         self.filetype = None
         self.document_type = None
+        self.start_date = None
+        self.end_date = None
 
 class EventFilter(GenericFilter):
     '''
@@ -294,6 +296,10 @@ class EventFilter(GenericFilter):
         self.latest_date = None
         self.local_only = False
         self.unverified_only = False
+
+class DocumentEventReferenceFilter(DocumentFilter, EventFilter):
+
+    pass
 
 class Entity():
     '''

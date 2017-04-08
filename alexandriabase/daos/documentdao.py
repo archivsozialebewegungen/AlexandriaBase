@@ -35,8 +35,9 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         '''
         if not document_filter.location:
             return None
-        return or_(self.table.c.standort == document_filter.location,
-                   self.table.c.standort.startswith("%s." % document_filter.location))
+        location = document_filter.location.upper()
+        return or_(self.table.c.standort == location,
+                   self.table.c.standort.startswith("%s." % location))
 
     def _build_filetype_expression(self, document_filter):
         '''
