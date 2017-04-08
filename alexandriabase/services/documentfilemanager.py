@@ -18,6 +18,7 @@ from PIL import Image, ImageFont, ImageDraw
 from alexandriabase import baseinjectorkeys, get_font_dir
 import logging
 from PyPDF2.utils import PdfReadError
+from alexandriabase.base_exceptions import NoSuchEntityException
 
 THUMBNAIL = 'thumbnail'
 DISPLAY_IMAGE = 'display_image'
@@ -70,8 +71,14 @@ class FileProvider():
     def get_pdf(self, document):
         '''
         Returns (and creates if necessary) the pdf file for a document.
+        TODO: Bug if there is no file attached yet to the document
         '''
-        document_file_info = self.document_file_info_dao.get_by_id(document.id)
+        try:
+            document_file_info = self.document_file_info_dao.get_by_id(document.id)
+        except NoSuchEntityException:
+            # Quick fix, reconsider 
+            raise DocumentFileNotFound(None)
+        
         try:
             return self.document_file_manager.get_generated_file(document_file_info, DOCUMENT_PDF)
         except FileNotFoundError:
