@@ -23,13 +23,14 @@ MODE_FULL = "full"
 
 class TestEnvironment():
     
-    def __init__(self, mode=MODE_SIMPLE):
+    def __init__(self, mode=MODE_SIMPLE, additional_modules=[]):
         self.tmpdir = tempfile.TemporaryDirectory()
         self.config_file_name = os.path.join(self.tmpdir.name, "config.xml")
         os.environ['ALEX_CONFIG'] = self.config_file_name
 
         config_file = os.path.join(get_testfiles_dir(), "testconfig.xml")
         self.config = Config(config_file)
+        self.config.additional_modules = additional_modules
         self.file_paths = []
         self.document_file_infos = []
         self.document_dir = None
