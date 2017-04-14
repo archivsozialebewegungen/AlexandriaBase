@@ -7,9 +7,14 @@ import os
 import sys
 from injector import Module, ClassProvider, singleton, provides, inject
 
-from alexandriabase import baseinjectorkeys
+from alexandriabase import baseinjectorkeys as injectorkeys
 from alexandriabase.config import Config
 
+def get_this_directory():
+
+    this_module = get_locale_dir.__module__
+    this_file = os.path.abspath(sys.modules[this_module].__file__)
+    return os.path.dirname(this_file)
 
 def get_locale_dir():
     '''
@@ -17,23 +22,20 @@ def get_locale_dir():
     the information of the location of the current module.
     '''
         
-    this_module = get_locale_dir.__module__
-    this_file = os.path.abspath(sys.modules[this_module].__file__)
-    this_directory = os.path.dirname(this_file)
-    return os.path.join(this_directory, 'locale')
+    return os.path.join(get_this_directory(), 'locale')
+
+gettext.install('alexandriabase', get_locale_dir())
 
 def get_font_dir():
     '''
-    Determines the location of the locale directory using
+    Determines the location of the font directory using
     the information of the location of the current module.
     '''
         
-    this_module = get_font_dir.__module__
-    this_file = os.path.abspath(sys.modules[this_module].__file__)
-    this_directory = os.path.dirname(this_file)
-    return os.path.join(this_directory, 'fonts')
+    return os.path.join(get_this_directory(), 'fonts')
 
-gettext.install('alexandriabase', get_locale_dir())
+# Must be done after installing gettext
+from alexandriabase.daos.basiccreatorprovider import BasicCreatorProvider
 
 class AlexBaseModule(Module):
     '''
@@ -44,13 +46,14 @@ class AlexBaseModule(Module):
         self.config = None
     
     def configure(self, binder):
-        pass
+        binder.bind(injectorkeys.CreatorProvider,
+                    ClassProvider(BasicCreatorProvider),
+                    scope=singleton)
         
 
     @singleton
-    @provides(baseinjectorkeys.CONFIG_KEY)
-    @inject(config_file=baseinjectorkeys.CONFIG_FILE_KEY)
-    def get_config(self, config_file):
+    @provides(injectorkeys.CONFIG_KEY)
+    def get_config(self):
         '''
         Returns the configuration.
         
@@ -61,5 +64,5 @@ class AlexBaseModule(Module):
         suffice.
         '''
         if self.config is None:
-            self.config = Config(config_file)
+            self.config = Config()
         return self.config

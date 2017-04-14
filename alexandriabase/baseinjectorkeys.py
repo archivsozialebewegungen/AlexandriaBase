@@ -6,7 +6,6 @@ from injector import Key
 
 
 # pylint: disable=invalid-name
-CONFIG_FILE_KEY = Key('config_file')
 CONFIG_KEY = Key('config')
 
 DBEngineKey = Key('db_engine')

@@ -4,9 +4,8 @@ Created on 18.10.2015
 @author: michael
 '''
 from xml.dom.minidom import parse, getDOMImplementation
-from injector import inject
 
-from alexandriabase import baseinjectorkeys
+import os
 
 
 class NoSuchConfigValue(Exception):
@@ -31,9 +30,11 @@ class Config:
     the entry node.
     '''
 
-    @inject(config_file=baseinjectorkeys.CONFIG_FILE_KEY)
     def __init__(self, config_file=None):
-        self.config_file = config_file
+        if config_file is not None:
+            self.config_file = config_file
+        else:
+            self.config_file = os.environ['ALEX_CONFIG']
         self.entries = {}
         self.lists = {}
         self.maps = {}

@@ -4,14 +4,13 @@ Created on 11.10.2015
 @author: michael
 '''
 from injector import Injector
-from sqlalchemy.engine import create_engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.expression import text
 import unittest
 
+from alexandriabase import AlexBaseModule, baseinjectorkeys
 from alex_test_utils import setup_database_schema, load_table_data, clear_table_data, \
-    TestEnvironment, MODE_SIMPLE, TestModule
-from alexandriabase import baseinjectorkeys, AlexBaseModule
+    TestEnvironment, MODE_SIMPLE
 from alexandriabase.base_exceptions import NoSuchEntityException, DataError
 from alexandriabase.daos import DaoModule
 from alexandriabase.daos.basedao import EntityDao
@@ -78,7 +77,6 @@ class TestDaoModuleConfiguration(unittest.TestCase):
     def test_configuration(self):
         
         injector = Injector([
-                        TestModule(self.env),
                         AlexBaseModule(),
                         DaoModule()
                          ])
@@ -89,12 +87,15 @@ class TestDaoModuleConfiguration(unittest.TestCase):
 class DatabaseBaseTest(unittest.TestCase):
 
     def setUp(self):
-        self.engine = create_engine('sqlite:///:memory:', echo=False) # @UnusedVariable
+        self.test_environment = TestEnvironment()
+        self.injector = Injector([AlexBaseModule(), DaoModule()])
+        self.engine = self.injector.get(baseinjectorkeys.DBEngineKey)
         setup_database_schema(self.engine)
         load_table_data(tables, self.engine)
 
     def tearDown(self):
         clear_table_data(tables, self.engine)
+        self.test_environment.cleanup()
         
 class RollbackTest(DatabaseBaseTest):
     

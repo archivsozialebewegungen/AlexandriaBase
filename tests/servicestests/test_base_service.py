@@ -7,7 +7,7 @@ from injector import Injector
 import unittest
 from unittest.mock import MagicMock
 
-from alex_test_utils import TestEnvironment, MODE_SIMPLE, TestModule
+from alex_test_utils import TestEnvironment, MODE_SIMPLE
 from alexandriabase import baseinjectorkeys, AlexBaseModule
 from alexandriabase.daos import DaoModule
 from alexandriabase.domain import Entity
@@ -26,7 +26,6 @@ class TestDaoModuleConfiguration(unittest.TestCase):
     def test_configuration(self):
         
         injector = Injector([
-                        TestModule(self.env),
                         AlexBaseModule(),
                         DaoModule(),
                         ServiceModule()

@@ -22,31 +22,14 @@ from alexandriabase.daos.metadata import DOCUMENT_TABLE
 from sqlalchemy.sql.operators import like_op
 from sqlalchemy.sql.expression import or_
 from alexandriabase.daos.relationsdao import DocumentEventRelationsDao
+from alexandriabase import baseinjectorkeys
 
 
 class TestDocumentDao(DatabaseBaseTest):
 
     def setUp(self):
         super().setUp()
-        config_file = os.path.join(get_testfiles_dir(), "testconfig.xml")
-        self.config = Config(config_file)
-        self.creator_dao = CreatorDao(self.engine)
-        self.references_dao = DocumentEventRelationsDao(self.engine,
-                                                        DocumentFilterExpressionBuilder(),
-                                                        EventFilterExpressionBuilder())
-        self.eventtype_dao = EventTypeDao(self.engine)
-        self.doc_type_dao = DocumentTypeDao(self.engine)
-        creator_provider = BasicCreatorProvider(self.creator_dao)
-        self.ereignis_dao = EventDao(self.engine,
-                               self.creator_dao,
-                               self.references_dao,
-                               self.eventtype_dao,
-                               creator_provider)
-        self.dao = DocumentDao(self.engine,
-                               self.config,
-                               self.creator_dao,
-                               self.doc_type_dao,
-                               creator_provider)
+        self.dao = self.injector.get(baseinjectorkeys.DokumentDaoKey)
         self.document_filter_handler = DocumentFilterExpressionBuilder()
 
     def tearDown(self):
@@ -271,7 +254,7 @@ class TestDocumentDao(DatabaseBaseTest):
         document.condition = "New state"
         document.keywords = "New keywords"
         document.standort = "1.2.3.IV"
-        document.document_type = self.doc_type_dao.get_by_id(17)
+        document.document_type = self.injector.get(baseinjectorkeys.DocumentTypeDaoKey).get_by_id(17)
 
         self.dao.save(document)
 
@@ -294,8 +277,8 @@ class TestDocumentDao(DatabaseBaseTest):
         document.description = "My description"
         document.keywords = "My keywords"
         document.condition = "My document state"
-        document.erfasser = self.creator_dao.get_by_id(2)
-        document.document_type = self.doc_type_dao.get_by_id(5)
+        document.erfasser = self.injector.get(baseinjectorkeys.CREATOR_DAO_KEY).get_by_id(2)
+        document.document_type = self.injector.get(baseinjectorkeys.DocumentTypeDaoKey).get_by_id(5)
         self.dao.save(document)
 
         document = self.dao.get_last()

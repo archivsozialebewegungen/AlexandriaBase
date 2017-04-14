@@ -16,6 +16,7 @@ from alexandriabase.daos.metadata import ALEXANDRIA_METADATA
 from alexandriabase.services.creatorservice import CreatorService
 from alexandriabase.domain import DocumentFileInfo
 from tempfile import NamedTemporaryFile
+from alexandriabase.daos.basiccreatorprovider import BasicCreatorProvider
 
 
 MODE_SIMPLE = "simple"
@@ -132,25 +133,9 @@ class TestEnvironment():
         
         self.tmpdir.cleanup()
 
-class TestModule(Module):
-            
-    def __init__(self, env):
-        super().__init__()
-        self.env = env
-                
-    def configure(self, binder):
-        binder.bind(baseinjectorkeys.CONFIG_FILE_KEY, to=self.env.config_file_name)
-        binder.bind(baseinjectorkeys.CreatorProvider,
-                    ClassProvider(CreatorService),
-                    scope=singleton)
-
 def get_test_base_dir():
     this_module = get_test_base_dir.__module__
     return get_path_for_module(this_module)
-
-#def get_test_class_dir(test_class):
-#    this_module = test_class.__class__.__module__
-#    return get_path_for_module(this_module)
 
 def get_pdf_samples_dir():
     return os.path.join(get_testfiles_dir(), "pdf_samples")
