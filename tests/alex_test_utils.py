@@ -3,20 +3,17 @@ Created on 01.03.2015
 
 @author: michael
 '''
-from injector import Module, ClassProvider, singleton
 import os
 import shutil
-from sqlalchemy import text
 import sys
 import tempfile
 
-from alexandriabase import baseinjectorkeys
+from tempfile import NamedTemporaryFile
+
+from sqlalchemy import text
 from alexandriabase.config import Config
 from alexandriabase.daos.metadata import ALEXANDRIA_METADATA
-from alexandriabase.services.creatorservice import CreatorService
 from alexandriabase.domain import DocumentFileInfo
-from tempfile import NamedTemporaryFile
-from alexandriabase.daos.basiccreatorprovider import BasicCreatorProvider
 
 
 MODE_SIMPLE = "simple"
