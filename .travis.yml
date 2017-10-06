@@ -3,6 +3,9 @@ python:
 - '3.4'
 - '3.5'
 - '3.6'
+before_install:
+- sudo apt-get -qq update
+- sudo apt-get install -y ghostscript
 install: pip install -r requirements.txt
 script: nosetests tests
 after_success: if [ "${TRAVIS_PYTHON_VERSION}" = "3.6" ]; then ./trigger_dependent_builds.sh;
