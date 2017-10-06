@@ -18,23 +18,16 @@ class DocumentService(BaseRecordService):
     with the database information
     '''
 
-    @inject(dokument_dao=baseinjectorkeys.DokumentDaoKey,
-            document_file_info_dao=baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
-            document_file_manager=baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
-            document_type_dao=baseinjectorkeys.DocumentTypeDaoKey,
-            document_file_provider=baseinjectorkeys.DOCUMENT_FILE_PROVIDER,
-            ereignis_dao=baseinjectorkeys.EreignisDaoKey,
-            file_format_service=baseinjectorkeys.FILE_FORMAT_SERVICE,
-            filter_expression_builder=baseinjectorkeys.DocumentFilterExpressionBuilderKey)
+    @inject
     def __init__(self,
-                 dokument_dao,
-                 document_file_info_dao,
-                 document_file_manager,
-                 document_type_dao,
-                 document_file_provider,
-                 ereignis_dao,
-                 file_format_service,
-                 filter_expression_builder):
+                 dokument_dao: baseinjectorkeys.DOCUMENT_DAO_KEY,
+                 document_file_info_dao: baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
+                 document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
+                 document_type_dao: baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY,
+                 document_file_provider: baseinjectorkeys.DOCUMENT_FILE_PROVIDER,
+                 ereignis_dao: baseinjectorkeys.EVENT_DAO_KEY,
+                 file_format_service: baseinjectorkeys.FILE_FORMAT_SERVICE,
+                 filter_expression_builder: baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY):
         # pylint: disable=too-many-arguments
         BaseRecordService.__init__(self, dokument_dao, filter_expression_builder)
         self.document_file_info_dao = document_file_info_dao

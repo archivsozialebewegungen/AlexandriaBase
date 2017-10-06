@@ -16,8 +16,8 @@ class DocumentTypeDao(CachingDao):
     Dao for document types.
     '''
 
-    @inject(db_engine=baseinjectorkeys.DBEngineKey)
-    def __init__(self, db_engine):
+    @inject
+    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
         super().__init__(db_engine, DOCUMENT_TYPE_TABLE)
 
     def _row_to_entity(self, row):

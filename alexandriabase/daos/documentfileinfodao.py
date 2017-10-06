@@ -22,9 +22,9 @@ class DocumentFileInfoDao(EntityDao):
     two are mixed into one table.
     '''
 
-    @inject(db_engine=baseinjectorkeys.DBEngineKey,
-            creator_provider=baseinjectorkeys.CreatorProvider)
-    def __init__(self, db_engine, creator_provider):
+    @inject
+    def __init__(self, db_engine=baseinjectorkeys.DB_ENGINE_KEY,
+                 creator_provider=baseinjectorkeys.CREATOR_PROVIDER_KEY):
         super().__init__(db_engine, DOCUMENT_TABLE)
         self.creator_provider = creator_provider
         self.table = DOCUMENT_TABLE

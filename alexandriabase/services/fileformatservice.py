@@ -86,8 +86,8 @@ class FileFormatService:
     supported_formats, format_aliases, resolution_handlers and
     allowed resolutions 
     '''
-    @inject(config=baseinjectorkeys.CONFIG_KEY)
-    def __init__(self, config):
+    @inject
+    def __init__(self, config: baseinjectorkeys.CONFIG_KEY):
         self.supported_formats = config.filetypes
         self.format_aliases = config.filetypealiases
         

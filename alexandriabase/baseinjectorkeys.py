@@ -8,30 +8,30 @@ from injector import Key
 # pylint: disable=invalid-name
 CONFIG_KEY = Key('config')
 
-DBEngineKey = Key('db_engine')
+DB_ENGINE_KEY = Key('db_engine')
 SQLAlchemyConnectionKey = Key('connection')
 
 DOCUMENT_FILE_MANAGER_KEY = Key('document_file_manager')
 
-DocumentFilterExpressionBuilderKey = Key('document_filter_expression_builder')
+DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY = Key('document_filter_expression_builder')
 EVENT_FILTER_EXPRESSION_BUILDER_KEY = Key('event_filter_expression_builder')
 
-CreatorProvider = Key('creator_provider')
+CREATOR_PROVIDER_KEY = Key('creator_provider')
 
 CREATOR_DAO_KEY = Key('erfasser_dao')
 REGISTRY_DAO_KEY = Key('registry_dao')
-DocumentTypeDaoKey = Key('document_type_dao')
-EreignisDaoKey = Key('ereignis_dao')
-DokumentDaoKey = Key('document_dao')
+DOCUMENT_TYPE_DAO_KEY = Key('document_type_dao')
+EVENT_DAO_KEY = Key('ereignis_dao')
+DOCUMENT_DAO_KEY = Key('document_dao')
 DOCUMENT_FILE_INFO_DAO_KEY = Key('document_file_info_dao')
-RelationsDaoKey = Key('relations_dao')
-EventTypeDaoKey = Key('ereignistyp_dao')
-EventCrossreferencesDaoKey = Key('eventcrossreferences_dao')
+RELATIONS_DAO_KEY = Key('relations_dao')
+EVENT_TYPE_DAO_KEY = Key('ereignistyp_dao')
+EVENT_CROSS_REFERENCES_DAO_KEY = Key('eventcrossreferences_dao')
 
-EventServiceKey = Key('event_service')
-DocumentServiceKey = Key('document_service')
+EVENT_SERVICE_KEY = Key('event_service')
+DOCUMENT_SERVICE_KEY = Key('document_service')
 DOCUMENT_TYPE_SERVICE_KEY = Key('document_type_service')
-ReferenceServiceKey = Key('relations_service')
+REFERENCE_SERVICE_KEY = Key('relations_service')
 FILE_FORMAT_SERVICE = Key('file_format_service')
 CREATOR_SERVICE_KEY = Key('creator_service')
 DATABASE_UPGRADE_SERVICE_KEY = Key('database_upgrade_service')

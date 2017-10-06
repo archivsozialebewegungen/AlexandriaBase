@@ -22,7 +22,7 @@ def get_version(connection):
 
 class BaseUpdate():
     '''
-    Baseclass for update classes that provides the set_version method
+    Baseclass for update classes that provider the set_version method
     '''
     
     def __init__(self, connection, dialect):
@@ -64,8 +64,8 @@ class DatabaseUpgradeService():
     Handles updating the database
     '''
 
-    @inject(db_engine=baseinjectorkeys.DBEngineKey)
-    def __init__(self, db_engine):
+    @inject
+    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
         '''
         Constructor
         '''

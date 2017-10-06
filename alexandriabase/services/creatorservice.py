@@ -13,8 +13,8 @@ class CreatorService(object):
     Service to manage the creators in the database.
     '''
 
-    @inject(creator_dao=baseinjectorkeys.CREATOR_DAO_KEY)
-    def __init__(self, creator_dao):
+    @inject
+    def __init__(self, creator_dao: baseinjectorkeys.CREATOR_DAO_KEY):
         '''
         Uses the creator dao for database access
         '''

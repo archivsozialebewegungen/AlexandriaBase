@@ -17,8 +17,8 @@ class EventTypeDao(GenericDao):
     Dao for event types.
     '''
 
-    @inject(db_engine=baseinjectorkeys.DBEngineKey)
-    def __init__(self, db_engine):
+    @inject
+    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
         super().__init__(db_engine)
         self.table = EVENTTYPE_TABLE
         self.ref_table = EVENT_EVENTTYPE_REFERENCE_TABLE

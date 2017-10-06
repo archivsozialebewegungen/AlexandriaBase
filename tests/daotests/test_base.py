@@ -82,14 +82,14 @@ class TestDaoModuleConfiguration(unittest.TestCase):
                          ])
 
         # Try to get the database engine, which is the crucial part
-        injector.get(baseinjectorkeys.DBEngineKey)    
+        injector.get(baseinjectorkeys.DB_ENGINE_KEY)    
         
 class DatabaseBaseTest(unittest.TestCase):
 
     def setUp(self):
         self.test_environment = TestEnvironment()
         self.injector = Injector([AlexBaseModule(), DaoModule()])
-        self.engine = self.injector.get(baseinjectorkeys.DBEngineKey)
+        self.engine = self.injector.get(baseinjectorkeys.DB_ENGINE_KEY)
         setup_database_schema(self.engine)
         load_table_data(tables, self.engine)
 

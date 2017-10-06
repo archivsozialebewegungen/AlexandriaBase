@@ -16,8 +16,8 @@ class EventCrossreferencesDao(GenericDao):
     Handles the crossreferences between events.
     '''
     
-    @inject(db_engine=baseinjectorkeys.DBEngineKey)
-    def __init__(self, db_engine):
+    @inject
+    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
         super().__init__(db_engine)
         self.table = EVENT_CROSS_REFERENCES_TABLE
 

@@ -1,11 +1,11 @@
 '''
-This package provides daos and services for the
+This package provider daos and services for the
 alexandria family of applications.
 '''
 import gettext
 import os
 import sys
-from injector import Module, ClassProvider, singleton, provides, inject
+from injector import Module, ClassProvider, singleton, provider, inject
 
 from alexandriabase import baseinjectorkeys as injectorkeys
 from alexandriabase.config import Config
@@ -46,14 +46,14 @@ class AlexBaseModule(Module):
         self.config = None
     
     def configure(self, binder):
-        binder.bind(injectorkeys.CreatorProvider,
+        binder.bind(injectorkeys.CREATOR_PROVIDER_KEY,
                     ClassProvider(BasicCreatorProvider),
                     scope=singleton)
         
 
     @singleton
-    @provides(injectorkeys.CONFIG_KEY)
-    def get_config(self):
+    @provider
+    def get_config(self) -> injectorkeys.CONFIG_KEY:
         '''
         Returns the configuration.
         

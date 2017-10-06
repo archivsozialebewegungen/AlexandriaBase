@@ -69,17 +69,13 @@ class EventDao(EntityDao):
     Persistance dao for events.
     '''
 
-    @inject(db_engine=baseinjectorkeys.DBEngineKey,
-            creator_dao=baseinjectorkeys.CREATOR_DAO_KEY,
-            references_dao=baseinjectorkeys.RelationsDaoKey,
-            eventtype_dao=baseinjectorkeys.EventTypeDaoKey,
-            creator_provider=baseinjectorkeys.CreatorProvider)
+    @inject
     def __init__(self,
-                 db_engine,
-                 creator_dao,
-                 references_dao,
-                 eventtype_dao,
-                 creator_provider):
+                 db_engine: baseinjectorkeys.DB_ENGINE_KEY,
+                 creator_dao: baseinjectorkeys.CREATOR_DAO_KEY,
+                 references_dao: baseinjectorkeys.RELATIONS_DAO_KEY,
+                 eventtype_dao: baseinjectorkeys.EVENT_TYPE_DAO_KEY,
+                 creator_provider: baseinjectorkeys.CREATOR_PROVIDER_KEY):
         '''
         Constructor with a lot of dependency injection.
         '''

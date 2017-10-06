@@ -16,15 +16,12 @@ class EventService(BaseRecordService):
     passed through to the daos.
     '''
 
-    @inject(ereignis_dao=baseinjectorkeys.EreignisDaoKey,
-            filter_expression_builder=baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY,
-            event_crossreferences_dao=baseinjectorkeys.EventCrossreferencesDaoKey,
-            event_type_dao=baseinjectorkeys.EventTypeDaoKey)
+    @inject
     def __init__(self,
-                 ereignis_dao,
-                 filter_expression_builder,
-                 event_crossreferences_dao,
-                 event_type_dao):
+                 ereignis_dao: baseinjectorkeys.EVENT_DAO_KEY,
+                 filter_expression_builder: baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY,
+                 event_crossreferences_dao: baseinjectorkeys.EVENT_CROSS_REFERENCES_DAO_KEY,
+                 event_type_dao: baseinjectorkeys.EVENT_TYPE_DAO_KEY):
         BaseRecordService.__init__(self, ereignis_dao, filter_expression_builder)
         self.event_crossreferences_dao = event_crossreferences_dao
         self.event_type_dao = event_type_dao

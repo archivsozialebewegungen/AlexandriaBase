@@ -53,15 +53,12 @@ class FileProvider():
     be relatively fail safe, provided that the original files exist.
     '''
     # pylint: disable=no-self-use
-    @inject(document_file_manager=baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
-            document_file_info_dao=baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
-            document_pdf_generator=baseinjectorkeys.DOCUMENT_PDF_GENERATOR_KEY,
-            document_file_image_generator=baseinjectorkeys.DOCUMENT_FILE_IMAGE_GENERATOR_KEY)
+    @inject
     def __init__(self,
-                 document_file_manager, 
-                 document_file_info_dao,
-                 document_pdf_generator,
-                 document_file_image_generator):
+                 document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY, 
+                 document_file_info_dao: baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
+                 document_pdf_generator: baseinjectorkeys.DOCUMENT_PDF_GENERATOR_KEY,
+                 document_file_image_generator: baseinjectorkeys.DOCUMENT_FILE_IMAGE_GENERATOR_KEY):
         
         self.document_file_manager = document_file_manager
         self.document_file_info_dao = document_file_info_dao
@@ -170,8 +167,8 @@ class DocumentFileImageGenerator:
     a file.
     '''
     
-    @inject(image_generators=baseinjectorkeys.IMAGE_GENERATORS_KEY)
-    def __init__(self, image_generators):
+    @inject
+    def __init__(self, image_generators: baseinjectorkeys.IMAGE_GENERATORS_KEY):
         
         self.image_generators = image_generators
         
@@ -191,8 +188,8 @@ class GraphicsImageGenerator:
     file as PIL image
     '''
  
-    @inject(document_file_manager=baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY)
-    def __init__(self, document_file_manager):   
+    @inject
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY):   
         self.document_file_manager = document_file_manager
         
     def generate_image(self, document_file_info):
@@ -206,9 +203,9 @@ class PdfImageGenerator:
     Create an image from a pdf file
     '''
     
-    @inject(document_file_manager=baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
-            pdf_image_extractor=baseinjectorkeys.PDF_IMAGE_EXTRACTOR_KEY)
-    def __init__(self, document_file_manager, pdf_image_extractor):
+    @inject
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
+                 pdf_image_extractor: baseinjectorkeys.PDF_IMAGE_EXTRACTOR_KEY):
         self.document_file_manager = document_file_manager
         self.pdf_image_extractor = pdf_image_extractor
         
@@ -226,9 +223,10 @@ class TextImageGenerator:
     an image from the pdf file.
     '''
     
-    @inject(pdf_image_extractor=baseinjectorkeys.PDF_IMAGE_EXTRACTOR_KEY,
-            pdf_generator=baseinjectorkeys.DOCUMENT_PDF_GENERATOR_KEY)
-    def __init__(self, pdf_image_extractor, pdf_generator):
+    @inject
+    def __init__(self,
+                 pdf_image_extractor: baseinjectorkeys.PDF_IMAGE_EXTRACTOR_KEY,
+                 pdf_generator: baseinjectorkeys.DOCUMENT_PDF_GENERATOR_KEY):
         self.pdf_image_extractor = pdf_image_extractor
         self.pdf_generator = pdf_generator
         
@@ -250,8 +248,8 @@ class MovieImageGenerator:
     Generates an image from a movie file 4 seconds into the movie
     '''
     
-    @inject(document_file_manager=baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY)
-    def __init__(self, document_file_manager):   
+    @inject
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY):   
         self.document_file_manager = document_file_manager
         
     def generate_image(self, document_file_info):
@@ -511,15 +509,15 @@ class PdfImageExtractor(object):
 
 class DocumentFileManager(object):
     '''
-    A simple class to manage document files. It provides
+    A simple class to manage document files. It provider
     all the methods needed to create, delete or find files
     referenced by a document file info.
     It also supports handling of derived files (pdfs, thumbnails etc.)
     '''
     # pylint: disable=no-self-use
-    @inject(config_service=baseinjectorkeys.CONFIG_KEY,
-            document_file_info_dao=baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY)
-    def __init__(self, config_service, document_file_info_dao):
+    @inject
+    def __init__(self, config_service: baseinjectorkeys.CONFIG_KEY,
+                 document_file_info_dao: baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY):
         '''
         Constructor reads the configuration from the config_service
         '''

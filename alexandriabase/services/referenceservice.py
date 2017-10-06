@@ -13,10 +13,11 @@ class ReferenceService:
     Service for handling references to the main records.
     '''
     
-    @inject(event_dao=baseinjectorkeys.EreignisDaoKey,
-            document_dao=baseinjectorkeys.DokumentDaoKey, 
-            references_dao=baseinjectorkeys.RelationsDaoKey)
-    def __init__(self, event_dao, document_dao, references_dao):
+    @inject
+    def __init__(self,
+                 event_dao: baseinjectorkeys.EVENT_DAO_KEY, 
+                 document_dao: baseinjectorkeys.DOCUMENT_DAO_KEY, 
+                 references_dao: baseinjectorkeys.RELATIONS_DAO_KEY):
         '''
         Used for injection.
         '''

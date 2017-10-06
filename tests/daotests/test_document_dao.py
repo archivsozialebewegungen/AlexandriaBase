@@ -29,7 +29,7 @@ class TestDocumentDao(DatabaseBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.dao = self.injector.get(baseinjectorkeys.DokumentDaoKey)
+        self.dao = self.injector.get(baseinjectorkeys.DOCUMENT_DAO_KEY)
         self.document_filter_handler = DocumentFilterExpressionBuilder()
 
     def tearDown(self):
@@ -254,7 +254,7 @@ class TestDocumentDao(DatabaseBaseTest):
         document.condition = "New state"
         document.keywords = "New keywords"
         document.standort = "1.2.3.IV"
-        document.document_type = self.injector.get(baseinjectorkeys.DocumentTypeDaoKey).get_by_id(17)
+        document.document_type = self.injector.get(baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY).get_by_id(17)
 
         self.dao.save(document)
 
@@ -278,7 +278,7 @@ class TestDocumentDao(DatabaseBaseTest):
         document.keywords = "My keywords"
         document.condition = "My document state"
         document.erfasser = self.injector.get(baseinjectorkeys.CREATOR_DAO_KEY).get_by_id(2)
-        document.document_type = self.injector.get(baseinjectorkeys.DocumentTypeDaoKey).get_by_id(5)
+        document.document_type = self.injector.get(baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY).get_by_id(5)
         self.dao.save(document)
 
         document = self.dao.get_last()

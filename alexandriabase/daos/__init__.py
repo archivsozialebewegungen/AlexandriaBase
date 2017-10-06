@@ -1,7 +1,7 @@
 '''
 Persistence module that handles all database access
 '''
-from injector import Module, ClassProvider, singleton, provides, inject
+from injector import Module, ClassProvider, singleton, provider, inject
 from sqlalchemy.engine import create_engine
 from sqlalchemy.pool import StaticPool
 
@@ -26,30 +26,31 @@ class DaoModule(Module):
     def configure(self, binder):
         binder.bind(baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY,
                     ClassProvider(EventFilterExpressionBuilder), scope=singleton)
-        binder.bind(baseinjectorkeys.DocumentFilterExpressionBuilderKey,
+        binder.bind(baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY,
                     ClassProvider(DocumentFilterExpressionBuilder), scope=singleton)
         binder.bind(baseinjectorkeys.CREATOR_DAO_KEY,
                     ClassProvider(CreatorDao), scope=singleton)
         binder.bind(baseinjectorkeys.REGISTRY_DAO_KEY,
                     ClassProvider(RegistryDao), scope=singleton)
-        binder.bind(baseinjectorkeys.DocumentTypeDaoKey,
+        binder.bind(baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY,
                     ClassProvider(DocumentTypeDao), scope=singleton)
         binder.bind(baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
                     ClassProvider(DocumentFileInfoDao), scope=singleton)
-        binder.bind(baseinjectorkeys.EreignisDaoKey,
+        binder.bind(baseinjectorkeys.EVENT_DAO_KEY,
                     ClassProvider(EventDao), scope=singleton)
-        binder.bind(baseinjectorkeys.DokumentDaoKey,
+        binder.bind(baseinjectorkeys.DOCUMENT_DAO_KEY,
                     ClassProvider(DocumentDao), scope=singleton)
-        binder.bind(baseinjectorkeys.RelationsDaoKey,
+        binder.bind(baseinjectorkeys.RELATIONS_DAO_KEY,
                     ClassProvider(DocumentEventRelationsDao), scope=singleton)
-        binder.bind(baseinjectorkeys.EventTypeDaoKey,
+        binder.bind(baseinjectorkeys.EVENT_TYPE_DAO_KEY,
                     ClassProvider(EventTypeDao), scope=singleton)
-        binder.bind(baseinjectorkeys.EventCrossreferencesDaoKey,
+        binder.bind(baseinjectorkeys.EVENT_CROSS_REFERENCES_DAO_KEY,
                     ClassProvider(EventCrossreferencesDao), scope=singleton)
 
-    @provides(baseinjectorkeys.DBEngineKey, scope=singleton)
-    @inject(config_service=baseinjectorkeys.CONFIG_KEY)
-    def create_database_engine(self, config_service):
+    @provider
+    @singleton
+    @inject
+    def create_database_engine(self, config_service: baseinjectorkeys.CONFIG_KEY) -> baseinjectorkeys.DB_ENGINE_KEY:
         '''
         Creates the database engine from configuration information
         '''

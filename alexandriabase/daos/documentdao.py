@@ -62,17 +62,13 @@ class DocumentDao(EntityDao):
     Persistance for the Document domain entity.
     '''
 
-    @inject(db_engine=baseinjectorkeys.DBEngineKey,
-            config=baseinjectorkeys.CONFIG_KEY,
-            creator_dao=baseinjectorkeys.CREATOR_DAO_KEY,
-            document_type_dao=baseinjectorkeys.DocumentTypeDaoKey,
-            creator_provider=baseinjectorkeys.CreatorProvider)
+    @inject
     def __init__(self,
-                 db_engine,
-                 config,
-                 creator_dao,
-                 document_type_dao,
-                 creator_provider):
+                 db_engine: baseinjectorkeys.DB_ENGINE_KEY,
+                 config: baseinjectorkeys.CONFIG_KEY,
+                 creator_dao: baseinjectorkeys.CREATOR_DAO_KEY,
+                 document_type_dao: baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY,
+                 creator_provider: baseinjectorkeys.CREATOR_PROVIDER_KEY):
         # pylint: disable=too-many-arguments
         super().__init__(db_engine, DOCUMENT_TABLE)
         self.config = config

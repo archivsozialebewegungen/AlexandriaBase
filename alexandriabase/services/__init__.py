@@ -1,7 +1,7 @@
 '''
 Package containing all the service modules.
 '''
-from injector import Module, ClassProvider, singleton, provides, inject
+from injector import Module, ClassProvider, singleton, provider, inject
 
 from alexandriabase import baseinjectorkeys
 from alexandriabase.daos import DaoModule
@@ -35,13 +35,13 @@ class ServiceModule(Module):
                     ClassProvider(GraphicsPdfHandler), scope=singleton)
         binder.bind(baseinjectorkeys.TEXT_PDF_HANDLER_KEY,
                     ClassProvider(TextPdfHandler), scope=singleton)
-        binder.bind(baseinjectorkeys.EventServiceKey,
+        binder.bind(baseinjectorkeys.EVENT_SERVICE_KEY,
                     ClassProvider(EventService), scope=singleton)
-        binder.bind(baseinjectorkeys.DocumentServiceKey,
+        binder.bind(baseinjectorkeys.DOCUMENT_SERVICE_KEY,
                     ClassProvider(DocumentService), scope=singleton)
         binder.bind(baseinjectorkeys.DOCUMENT_TYPE_SERVICE_KEY,
                     ClassProvider(DocumentTypeService), scope=singleton)
-        binder.bind(baseinjectorkeys.ReferenceServiceKey,
+        binder.bind(baseinjectorkeys.REFERENCE_SERVICE_KEY,
                     ClassProvider(ReferenceService), scope=singleton)
         binder.bind(baseinjectorkeys.FILE_FORMAT_SERVICE,
                     ClassProvider(FileFormatService), scope=singleton)
@@ -64,10 +64,11 @@ class ServiceModule(Module):
         binder.bind(baseinjectorkeys.DOCUMENT_FILE_PROVIDER,
                     ClassProvider(FileProvider), scope=singleton)
 
-    @provides(baseinjectorkeys.PDF_HANDLERS_KEY)
-    @inject(graphics_handler=baseinjectorkeys.GRAPHICS_PDF_HANDLER_KEY,
-            text_handler=baseinjectorkeys.TEXT_PDF_HANDLER_KEY)
-    def provide_pdf_handlers(self, graphics_handler, text_handler):
+    @provider
+    @inject
+    def provide_pdf_handlers(self, 
+                             graphics_handler: baseinjectorkeys.GRAPHICS_PDF_HANDLER_KEY,
+                             text_handler: baseinjectorkeys.TEXT_PDF_HANDLER_KEY) -> baseinjectorkeys.PDF_HANDLERS_KEY:
         '''
         Returns the handlers to create pdf representations for certain
         file types.
@@ -79,16 +80,13 @@ class ServiceModule(Module):
                 'gif': graphics_handler,
                 'txt': text_handler}
 
-    @provides(baseinjectorkeys.IMAGE_GENERATORS_KEY)
-    @inject(graphics_image_generator=baseinjectorkeys.GRAPHICS_IMAGE_GENERATOR_KEY,
-            text_image_generator=baseinjectorkeys.TEXT_IMAGE_GENERATOR_KEY,
-            pdf_image_generator=baseinjectorkeys.PDF_IMAGE_GENERATOR_KEY,
-            movie_image_generator=baseinjectorkeys.MOVIE_IMAGE_GENERATOR_KEY)
+    @provider
+    @inject
     def provide_image_generators(self,
-                                 graphics_image_generator,
-                                 text_image_generator,
-                                 pdf_image_generator,
-                                 movie_image_generator):
+                                 graphics_image_generator: baseinjectorkeys.GRAPHICS_IMAGE_GENERATOR_KEY,
+                                 text_image_generator: baseinjectorkeys.TEXT_IMAGE_GENERATOR_KEY,
+                                 pdf_image_generator: baseinjectorkeys.PDF_IMAGE_GENERATOR_KEY,
+                                 movie_image_generator: baseinjectorkeys.MOVIE_IMAGE_GENERATOR_KEY) -> baseinjectorkeys.IMAGE_GENERATORS_KEY:
         
         return {'jpg': graphics_image_generator,
                 'tif': graphics_image_generator,

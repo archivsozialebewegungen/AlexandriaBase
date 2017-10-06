@@ -181,8 +181,8 @@ class TextPdfHandler(object):
 
     _re_empty_line = re.compile(r"^\s+$")
     
-    @inject(document_file_manager=baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY)
-    def __init__(self, document_file_manager):
+    @inject
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY):
         '''
         Constructor
         '''
@@ -236,8 +236,8 @@ class GraphicsPdfHandler(object):
     Handler for graphic formats.
     '''
     
-    @inject(document_file_manager=baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY)
-    def __init__(self, document_file_manager):
+    @inject
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY):
         '''
         Constructor
         '''
@@ -280,10 +280,11 @@ class DocumentPdfGenerationService(object):
     '''
     # pylint: disable=no-self-use
 
-    @inject(document_file_info_dao=baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
-            document_file_manager=baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
-            pdf_handlers=baseinjectorkeys.PDF_HANDLERS_KEY)
-    def __init__(self, document_file_info_dao, document_file_manager, pdf_handlers):
+    @inject
+    def __init__(self,
+                 document_file_info_dao: baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
+                 document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
+                 pdf_handlers: baseinjectorkeys.PDF_HANDLERS_KEY):
         '''
         Constructor
         '''

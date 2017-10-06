@@ -348,7 +348,7 @@ class DocumentType(Entity):
 
 class MainTableEntity(Entity):
     '''
-    Another abstract class that provides common functionality
+    Another abstract class that provider common functionality
     for documents and events.
     '''
 

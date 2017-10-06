@@ -16,8 +16,8 @@ class RegistryDao(GenericDao):
     Reads and writes keys / value pairs from the database
     '''
 
-    @inject(db_engine=baseinjectorkeys.DBEngineKey)
-    def __init__(self, db_engine):
+    @inject
+    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
         super().__init__(db_engine)
         self.table = REGISTRY_TABLE
 

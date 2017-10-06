@@ -32,7 +32,7 @@ class TestDaoModuleConfiguration(unittest.TestCase):
                          ])
 
         # Try to get the database engine, which is the crucial part
-        injector.get(baseinjectorkeys.DBEngineKey)
+        injector.get(baseinjectorkeys.DB_ENGINE_KEY)
         
         # Test getting pdf handlers
         injector.get(baseinjectorkeys.PDF_HANDLERS_KEY)

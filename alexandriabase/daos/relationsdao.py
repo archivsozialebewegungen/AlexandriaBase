@@ -18,10 +18,11 @@ class DocumentEventRelationsDao(GenericDao):
     Handles all kinds of relations
     '''
     
-    @inject(db_engine=baseinjectorkeys.DBEngineKey,
-            document_filter_expression_builder=baseinjectorkeys.DocumentFilterExpressionBuilderKey,
-            event_filter_expression_builder=baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY)
-    def __init__(self, db_engine, document_filter_expression_builder, event_filter_expression_builder):
+    @inject
+    def __init__(self, 
+                 db_engine: baseinjectorkeys.DB_ENGINE_KEY,
+                 document_filter_expression_builder: baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY,
+                 event_filter_expression_builder: baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY):
         super().__init__(db_engine)
         self.deref_table = DOCUMENT_EVENT_REFERENCE_TABLE
         self.doc_table = DOCUMENT_TABLE

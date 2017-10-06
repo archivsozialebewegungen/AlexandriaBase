@@ -13,8 +13,8 @@ class DocumentTypeService(object):
     classdocs
     '''
 
-    @inject(document_type_dao=baseinjectorkeys.DocumentTypeDaoKey)
-    def __init__(self, document_type_dao):
+    @inject
+    def __init__(self, document_type_dao: baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY):
         '''
         Constructor
         '''

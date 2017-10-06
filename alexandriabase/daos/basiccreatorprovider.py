@@ -17,8 +17,8 @@ class BasicCreatorProvider(object):
     applications should provide their own implementations
     that return the current user.
     '''
-    @inject(creator_dao=baseinjectorkeys.CREATOR_DAO_KEY)
-    def __init__(self, creator_dao):
+    @inject
+    def __init__(self, creator_dao: baseinjectorkeys.CREATOR_DAO_KEY):
         self.creator_dao = creator_dao
 
     def _get_creator(self):
