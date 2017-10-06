@@ -98,6 +98,7 @@ class GenericDao:
     '''
 
     def __init__(self, db_engine):
+        assert(db_engine != None)
         self.db_engine = db_engine
         self.transactional_connection = None
         self.transaction_level = 0
