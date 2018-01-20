@@ -86,12 +86,12 @@ class EventDao(EntityDao):
         self.eventtype_dao = eventtype_dao
         self.creator_provider = creator_provider
 
-    def get_nearest(self, alex_date, filter_expression=None):
-        ''' Get the entity matching the date, or, if not existing,
-        the next entity after this date. If this does not provide
-        an entity, get the last entity.'''
-        min_id = alex_date.as_key(1)
-        return super().get_nearest(min_id, filter_expression)
+#    def get_nearest(self, alex_date, filter_expression=None):
+#        ''' Get the entity matching the date, or, if not existing,
+#        the next entity after this date. If this does not provide
+#        an entity, get the last entity.'''
+#        min_id = alex_date.as_key(1)
+#        return super().get_nearest(min_id, filter_expression)
 
     def _update(self, event):
         '''

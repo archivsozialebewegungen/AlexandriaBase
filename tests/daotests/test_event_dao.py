@@ -94,14 +94,14 @@ class TestEreignisDao(DatabaseBaseTest):
         self.assertEqual(ereignis.id, 1961050101)
         
     def testGetNearest(self):
-        alex_date = AlexDate(1940)
-        nearest = self.dao.get_nearest(alex_date)
+        event_id = 194000000
+        nearest = self.dao.get_nearest(event_id)
         self.assertEqual(1940000001, nearest.id)
-        alex_date = AlexDate(1941)
-        nearest = self.dao.get_nearest(alex_date)
+        event_id = 1941000000
+        nearest = self.dao.get_nearest(event_id)
         self.assertEqual(1950000001, nearest.id)
-        alex_date = AlexDate(1980)
-        nearest = self.dao.get_nearest(alex_date)
+        event_id = 1980000000
+        nearest = self.dao.get_nearest(event_id)
         self.assertEqual(1961050101, nearest.id)
 
     def test_filtering(self):

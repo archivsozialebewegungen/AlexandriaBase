@@ -26,9 +26,6 @@ class EventService(BaseRecordService):
         self.event_crossreferences_dao = event_crossreferences_dao
         self.event_type_dao = event_type_dao
 
-    def get_nearest(self, event_date, filter_expression):
-        return self.dao.get_nearest(event_date, filter_expression)
-
     def get_events_for_date(self, alex_date):
         '''
         Returns all events that have the given start date
