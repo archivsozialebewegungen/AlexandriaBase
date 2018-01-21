@@ -1,10 +1,10 @@
-injector==0.13.1
-SQLAlchemy==1.1.14
-reportlab==3.4.0
-psycopg2==2.7.3.1
-pyPDF2=1.26.0
-Pillow==4.3.0
-ddt==1.1.1
-pytest==3.2.3
+injector~=0.13
+SQLAlchemy~=1.1
+reportlab~=3.4
+psycopg2~=2.7
+pyPDF2~=1.26
+Pillow~=4.3
+ddt~=1.1
+pytest~=3.2
 
 
