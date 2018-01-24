@@ -646,7 +646,7 @@ class Tree:
                 except KeyError:
                     # TODO: Log an error that the the systematic tree
                     # is not well formed in the database
-                    print("Error: Can't find parent for systematic point %s!" % node)
+                    print("Error: Can't find parent for tree node %s!" % node)
 
     def _analyze_entities(self, entity_list):
         
