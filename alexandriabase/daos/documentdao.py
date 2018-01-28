@@ -9,7 +9,7 @@ from sqlalchemy.sql.functions import func
 
 from alexandriabase import baseinjectorkeys
 from alexandriabase.daos.basedao import GenericFilterExpressionBuilder, EntityDao
-from alexandriabase.daos.metadata import DOCUMENT_TABLE, DOCUMENT_TYPE_TABLE
+from alexandriabase.daos.metadata import DOCUMENT_TABLE
 from alexandriabase.domain import Document, DocumentStatistics
 
 
@@ -23,6 +23,7 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         self.table = DOCUMENT_TABLE
         self.textcolumn = self.table.c.beschreibung
 
+    # pylint: disable=arguments-differ
     def _create_expressions(self, document_filter):
         super()._create_expressions(document_filter)
         self._append_expression(self._build_location_expression(document_filter))
@@ -45,7 +46,8 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         '''
         if not document_filter.filetype:
             return None
-        subquery = select([self.table.c.hauptnr]).where(self.table.c.dateityp == document_filter.filetype)
+        subquery = select([self.table.c.hauptnr]).\
+            where(self.table.c.dateityp == document_filter.filetype)
         return self.table.c.hauptnr.in_(subquery)
 
     def _build_document_type_expression(self, document_filter):
@@ -54,7 +56,8 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         '''
         if not document_filter.document_type:
             return None
-        subquery = select([self.table.c.hauptnr]).where(self.table.c.doktyp == document_filter.document_type)
+        subquery = select([self.table.c.hauptnr]).where(
+            self.table.c.doktyp == document_filter.document_type)
         return self.table.c.hauptnr.in_(subquery)
 
 class DocumentDao(EntityDao):
@@ -90,6 +93,7 @@ class DocumentDao(EntityDao):
         query = self._generate_query_from_subquery(subquery)
         return self._get_one_or_none(query)
 
+    # pylint: disable=arguments-differ
     def get_next(self, dokument, filter_expression=None):
         where_clause = DOCUMENT_TABLE.c.hauptnr > dokument.id  # @UndefinedVariable
         if not isinstance(filter_expression, type(None)):
@@ -100,8 +104,7 @@ class DocumentDao(EntityDao):
         document = self._get_one_or_none(query)
         if document is None:
             return self.get_first(filter_expression)
-        else:
-            return document
+        return document
 
     def get_previous(self, dokument, filter_expression=None):
         where_clause = self.table.c.hauptnr < dokument.id
@@ -127,9 +130,9 @@ class DocumentDao(EntityDao):
         document = self._get_one_or_none(query)
         if document is None:
             return self.get_last(filter_expression)
-        else:
-            return document
+        return document
 
+    # pylint: disable=arguments-differ
     def _delete(self, document_id):
         '''
         Deletes all rows pertaining to the given document.
@@ -155,6 +158,7 @@ class DocumentDao(EntityDao):
         dokument.document_type = self.document_type_dao.get_by_id(row[self.table.c.doktyp])
         return dokument
 
+    # pylint: disable=arguments-differ
     def _update(self, document):
         update_statement = update(DOCUMENT_TABLE).\
         where(self.table.c.laufnr == document.id).\
@@ -166,6 +170,7 @@ class DocumentDao(EntityDao):
         self.connection.execute(update_statement)
         return document
 
+    # pylint: disable=arguments-differ
     def _insert(self, document):
         # pylint: disable=protected-access
         document._id = self._get_next_id()

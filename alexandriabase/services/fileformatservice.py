@@ -8,8 +8,6 @@ from PIL import Image  # @UnresolvedImport
 from injector import inject
 
 from alexandriabase import baseinjectorkeys
-import logging
-import math
 
 
 def get_graphic_file_resolution(file):

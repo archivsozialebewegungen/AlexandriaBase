@@ -3,10 +3,10 @@ Created on 11.10.2015
 
 @author: michael
 '''
-from _functools import reduce
 from threading import Lock
 from sqlalchemy.sql.expression import or_, select, and_, delete
 from sqlalchemy.sql.functions import func
+from _functools import reduce
 
 from alexandriabase.base_exceptions import NoSuchEntityException, DataError
 from alexandriabase.daos.metadata import get_foreign_keys
@@ -16,7 +16,7 @@ def combine_expressions(expressions, method):
     '''
     Combines the different expressions with and.
     '''
-    if len(expressions) == 0:
+    if not expressions:
         return None
     if len(expressions) == 1:
         return expressions[0]
@@ -110,8 +110,7 @@ class GenericDao:
         '''
         if self.transactional_connection != None:
             return self.transactional_connection
-        else:
-            return self.db_engine.connect()
+        return self.db_engine.connect()
 
     def transactional(self, function, *args, **kwargs):
         '''
@@ -237,10 +236,10 @@ class EntityDao(GenericDao):
             entities.append(self._row_to_entity(row))
         return entities
 
-    def get_by_id(self, entityid):
+    def get_by_id(self, entity_id):
         ''' Get an entity by id. Throws exception when the entity does not exist.'''
         query = select([self.primary_key.table])\
-            .where(self.primary_key == entityid)
+            .where(self.primary_key == entity_id)
         return self._get_exactly_one(query)
 
     def get_first(self, filter_expression=None):
@@ -272,8 +271,7 @@ class EntityDao(GenericDao):
         entity = self._get_one_or_none(query)
         if not entity:
             return self.get_first(filter_expression)
-        else:
-            return entity
+        return entity
 
     def get_previous(self, entity, filter_expression=None):
         ''' Get the previous entity or the last, if it is the first'''
@@ -286,8 +284,7 @@ class EntityDao(GenericDao):
         entity = self._get_one_or_none(query)
         if not entity:
             return self.get_last(filter_expression)
-        else:
-            return entity
+        return entity
 
     def get_nearest(self, entity_id, filter_expression=None):
         ''' Get the entity matching the id, or, if not existing,
@@ -302,8 +299,7 @@ class EntityDao(GenericDao):
         entity = self._get_one_or_none(query)
         if not entity:
             return self.get_last(filter_expression)
-        else:
-            return entity
+        return entity
 
     def save(self, entity):
         '''
@@ -313,8 +309,7 @@ class EntityDao(GenericDao):
         '''
         if entity.id:
             return self.transactional(self._update, entity)
-        else:
-            return self.transactional(self._insert, entity)
+        return self.transactional(self._insert, entity)
 
     def delete(self, entity_id):
         '''
@@ -413,7 +408,7 @@ class CachingDao(EntityDao):
     def find(self, condition=None, page=None, page_size=1):
         entity_list = super().find(condition, page, page_size)
         return self._cache_list(entity_list)
-
+    
     def get_by_id(self, entity_id):
         
         if entity_id in self.cache:

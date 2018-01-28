@@ -4,13 +4,13 @@ Created on 01.02.2015
 @author: michael
 '''
 from datetime import date
-import re
+import logging
 
-def expand_id(id):
+def expand_id(identifier):
     '''
     Returns the basename of the file. 
     '''
-    base = "%d" % id
+    base = "%d" % identifier
     while len(base) < 8:
         base = "0%s" % base
     return base
@@ -19,8 +19,6 @@ class InvalidDateException(Exception):
     '''
     Exception for invalid AlexDate and AlexDateRanges.
     '''
-    def __init__(self, message):
-        super().__init__(message)
 
 class InvalidChildException(Exception):
     '''
@@ -164,8 +162,7 @@ class AlexDate:
         elif self.month:
             return "%s %d" % (self.MONTHS[self.month],
                               self.year)
-        else:
-            return "%d" % (self.year)
+        return "%d" % (self.year)
 
     def __eq__(self, other):
         if other is None:
@@ -256,8 +253,7 @@ class AlexDateRange():
     def __str__(self):
         if self.end_date:
             return "%s - %s" % (self.start_date, self.end_date)
-        else:
-            return "%s" % self.start_date
+        return "%s" % self.start_date
 
     def __eq__(self, other):
         if other is None:
@@ -298,8 +294,9 @@ class EventFilter(GenericFilter):
         self.unverified_only = False
 
 class DocumentEventReferenceFilter(DocumentFilter, EventFilter):
-
-    pass
+    '''
+    Class combining Document- and EventFilter
+    '''
 
 class Entity():
     '''
@@ -413,8 +410,7 @@ class DocumentFileInfo(Entity):
     def __str__(self):
         if self.id is None:
             return "New document file info"
-        else:
-            return self.get_file_name()
+        return self.get_file_name()
 
 class Document(MainTableEntity):
     '''
@@ -644,9 +640,10 @@ class Tree:
                     parent_node = node_dictionary[node.parent_id]
                     parent_node.add_child(node)
                 except KeyError:
-                    # TODO: Log an error that the the systematic tree
-                    # is not well formed in the database
-                    print("Error: Can't find parent for tree node %s!" % node)
+                    logger = logging.getLogger()
+                    logger.error("Error: Corrupt tree structure. " +
+                                 "Can't find parent for tree node %s!", 
+                                 node)
 
     def _analyze_entities(self, entity_list):
         

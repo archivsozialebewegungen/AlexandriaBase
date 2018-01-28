@@ -68,7 +68,8 @@ class ServiceModule(Module):
     @inject
     def provide_pdf_handlers(self, 
                              graphics_handler: baseinjectorkeys.GRAPHICS_PDF_HANDLER_KEY,
-                             text_handler: baseinjectorkeys.TEXT_PDF_HANDLER_KEY) -> baseinjectorkeys.PDF_HANDLERS_KEY:
+                             text_handler: baseinjectorkeys.TEXT_PDF_HANDLER_KEY
+                            ) -> baseinjectorkeys.PDF_HANDLERS_KEY:
         '''
         Returns the handlers to create pdf representations for certain
         file types.
@@ -83,10 +84,19 @@ class ServiceModule(Module):
     @provider
     @inject
     def provide_image_generators(self,
-                                 graphics_image_generator: baseinjectorkeys.GRAPHICS_IMAGE_GENERATOR_KEY,
-                                 text_image_generator: baseinjectorkeys.TEXT_IMAGE_GENERATOR_KEY,
-                                 pdf_image_generator: baseinjectorkeys.PDF_IMAGE_GENERATOR_KEY,
-                                 movie_image_generator: baseinjectorkeys.MOVIE_IMAGE_GENERATOR_KEY) -> baseinjectorkeys.IMAGE_GENERATORS_KEY:
+                                 graphics_image_generator:
+                                 baseinjectorkeys.GRAPHICS_IMAGE_GENERATOR_KEY,
+                                 text_image_generator:
+                                 baseinjectorkeys.TEXT_IMAGE_GENERATOR_KEY,
+                                 pdf_image_generator:
+                                 baseinjectorkeys.PDF_IMAGE_GENERATOR_KEY,
+                                 movie_image_generator:
+                                 baseinjectorkeys.MOVIE_IMAGE_GENERATOR_KEY
+                                ) -> baseinjectorkeys.IMAGE_GENERATORS_KEY:
+        '''
+        Returns the handlers for graphic images
+        '''
+        # pylint: disable=no-self-use
         
         return {'jpg': graphics_image_generator,
                 'tif': graphics_image_generator,

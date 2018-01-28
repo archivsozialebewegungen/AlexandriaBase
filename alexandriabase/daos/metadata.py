@@ -3,8 +3,7 @@ Created on 11.10.2015
 
 @author: michael
 '''
-from sqlalchemy.sql.schema import MetaData, Table, Column, ForeignKey, \
-    ForeignKeyConstraint, UniqueConstraint
+from sqlalchemy.sql.schema import MetaData, Table, Column, ForeignKey
 from sqlalchemy.sql.sqltypes import Integer, String, Date
 
 CURRENT_VERSION = '0.4'

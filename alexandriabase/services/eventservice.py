@@ -64,7 +64,8 @@ class EventService(BaseRecordService):
         event = Event()
         event.daterange = date_range
         return event
-
+    
+    # pylint: disable=arguments-differ
     def delete(self, event):
         self.dao.delete(event.id)
         

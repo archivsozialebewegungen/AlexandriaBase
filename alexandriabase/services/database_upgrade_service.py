@@ -49,9 +49,6 @@ class UpdateFrom0_3(BaseUpdate):
                          'postgresql': 'alter table dokument alter seite drop not null, ' +
                                        'alter dateityp drop not null'}
     
-    def __init__(self, connection, dialect):
-        super().__init__(connection, dialect)
-    
     def run(self):
         '''
         Runs the upgrade

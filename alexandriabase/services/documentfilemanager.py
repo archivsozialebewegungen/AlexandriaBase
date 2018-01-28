@@ -11,13 +11,15 @@ import struct
 from io import BytesIO
 import tempfile
 from subprocess import call
-import PyPDF2
+import logging
+
+from PyPDF2.pdf import PdfFileReader
+from PyPDF2.utils import PdfReadError
 
 from injector import inject
+
 from PIL import Image, ImageFont, ImageDraw
 from alexandriabase import baseinjectorkeys, get_font_dir
-import logging
-from PyPDF2.utils import PdfReadError
 from alexandriabase.base_exceptions import NoSuchEntityException
 
 THUMBNAIL = 'thumbnail'
@@ -41,7 +43,10 @@ class NoImageGeneratorError(Exception):
         self.filetype = filetype
 
 class ImageExtractionFailure(Exception):
-    
+    '''
+    Exception class for failed image extraction
+    '''
+    # pylint: disable=super-init-not-called
     def __init__(self, file_path, return_value):
         self.file_path = file_path
         self.return_value = return_value
@@ -145,18 +150,18 @@ class FileProvider():
         img = Image.new('P', (400, 440), color=255)
         font = ImageFont.truetype(os.path.join(get_font_dir(), "Arial_Bold.ttf"), 48)
         draw = ImageDraw.Draw(img)
-        draw.text((10,60), "Keine Vorschau", font=font, fill=0)
-        draw.text((10,120), "für Datei", font=font, fill=0)
-        draw.text((10,180), document_file_info.get_file_name(), font=font, fill=0)
+        draw.text((10, 60), "Keine Vorschau", font=font, fill=0)
+        draw.text((10, 120), "für Datei", font=font, fill=0)
+        draw.text((10, 180), document_file_info.get_file_name(), font=font, fill=0)
         return img
 
     def _create_no_display_image(self, document_file_info):
         img = Image.new('P', (400, 440), color=255)
         font = ImageFont.truetype(os.path.join(get_font_dir(), "Arial_Bold.ttf"), 48)
         draw = ImageDraw.Draw(img)
-        draw.text((10,60), "Keine Graphik", font=font, fill=0)
-        draw.text((10,120), "für Datei", font=font, fill=0)
-        draw.text((10,180), document_file_info.get_file_name(), font=font, fill=0)
+        draw.text((10, 60), "Keine Graphik", font=font, fill=0)
+        draw.text((10, 120), "für Datei", font=font, fill=0)
+        draw.text((10, 180), document_file_info.get_file_name(), font=font, fill=0)
         return img
         
 class DocumentFileImageGenerator:
@@ -265,14 +270,14 @@ class MovieImageGenerator:
         output_file_name = tmp_file.name
         stdio = open(os.devnull, 'wb')
         call(["ffmpeg",
-             "-itsoffset", "-4",
-             "-i", input_file_name,
-             "-vcodec", "mjpeg",
-             "-vframes", "1",
-             "-an", 
-             "-f", "rawvideo",
-             "-y",
-             output_file_name
+              "-itsoffset", "-4",
+              "-i", input_file_name,
+              "-vcodec", "mjpeg",
+              "-vframes", "1",
+              "-an", 
+              "-f", "rawvideo",
+              "-y",
+              output_file_name
              ],
              stdout=stdio,
              stderr=stdio)
@@ -316,12 +321,12 @@ class PdfImageExtractor(object):
         
         But since the code is written, we use it.
         '''
-        # pylint: disable=bare-except
-
+        # pylint: disable=broad-except
+        # pylint: disable=too-many-return-statements
         try:
-            pdf_reader = PyPDF2.PdfFileReader(open(path, "rb"))
+            pdf_reader = PdfFileReader(open(path, "rb"))
         except Exception as error:
-            self.logger.debug("Trying ghostscript due to pyPDF2 read failure (%s)." % error)
+            self.logger.debug("Trying ghostscript due to pyPDF2 read failure (%s).", error)
             return self._extract_using_ghostscript(path)
             
         if pdf_reader.isEncrypted:
@@ -331,13 +336,14 @@ class PdfImageExtractor(object):
         try:
             page0 = pdf_reader.getPage(0)
         except Exception as error:
-            self.logger.debug("Trying ghostscript due to page read failure (%s)." % error)
+            self.logger.debug("Trying ghostscript due to page read failure (%s).", error)
             return self._extract_using_ghostscript(path)
             
         try:
             page_text = page0.extractText()
         except Exception as error:
-            self.logger.debug("Trying ghostscript due to error extracting text from pdf (%s)." % error)
+            self.logger.debug("Trying ghostscript due " +
+                              "to error extracting text from pdf (%s).", error)
             return self._extract_using_ghostscript(path)
 
         if page_text != '':
@@ -347,7 +353,8 @@ class PdfImageExtractor(object):
         if len(image_objects) != 1:
             # If we have zero images, we need to use ghostscript
             # If there are several images, it is too complicated to join them
-            self.logger.debug("Using ghostscript (number of extractable images is %d)." % len(image_objects))
+            self.logger.debug("Using ghostscript (number of extractable " +
+                              "images is %d).", len(image_objects))
             return self._extract_using_ghostscript(path)
         
         image_object = image_objects[0]
@@ -357,13 +364,11 @@ class PdfImageExtractor(object):
                 filter_type = (filter_type,)
             for handler_key in self.data_extractors:
                 if handler_key in filter_type:
-                    self.logger.debug("Extracting for filter type %s" % filter_type)
+                    self.logger.debug("Extracting for filter type %s", filter_type)
                     return self.data_extractors[handler_key](image_object)
         except Exception as error:
             if self.logger.getEffectiveLevel() == logging.DEBUG:
-                self.logger.exception("Exception running extractor (%s)." % error)
-            # We really don't care what went wrong
-            pass
+                self.logger.exception("Exception running extractor (%s).", error)
 
         # if we did not succeed for whatever reason, we fall back
         # to interpreting the pdf file using ghostscript
@@ -378,7 +383,7 @@ class PdfImageExtractor(object):
         path = tmp_file.name
         tmp_file.close()
         
-        stdio =open(os.devnull, 'wb')
+        stdio = open(os.devnull, 'wb')
         return_value = call(["gs",
                              "-sDEVICE=png16m",
                              "-dNOPAUSE", "-dFirstPage=1",
@@ -393,6 +398,7 @@ class PdfImageExtractor(object):
                             stderr=stdio)
         
         if return_value != 0:
+            # pylint: disable=bare-except
             try:
                 os.unlink(path)
             except:
@@ -410,20 +416,33 @@ class PdfImageExtractor(object):
         '''
         tiff_header_struct = '<' + '2s' + 'h' + 'l' + 'h' + 'hhll' * 8 + 'l'
         return struct.pack(tiff_header_struct,
-                       b'II',  # Byte order indication: Little indian
-                       42,  # Version number (always 42)
-                       8,  # Offset to first IFD
-                       8,  # Number of tags in IFD
-                       256, 4, 1, width,  # ImageWidth, LONG, 1, width
-                       257, 4, 1, height,  # ImageLength, LONG, 1, lenght
-                       258, 3, 1, 1,  # BitsPerSample, SHORT, 1, 1
-                       259, 3, 1, compression,  # Compression, SHORT, 1, 4 = CCITT Group 4 fax encoding
-                       262, 3, 1, 0,  # Threshholding, SHORT, 1, 0 = WhiteIsZero
-                       273, 4, 1, struct.calcsize(tiff_header_struct),  # StripOffsets, LONG, 1, len of header
-                       278, 4, 1, height,  # RowsPerStrip, LONG, 1, lenght
-                       279, 4, 1, data_size,  # StripByteCounts, LONG, 1, size of image
-                       0  # last IFD
-                       )
+                           # Byte order indication: Little indian
+                           b'II',
+                           # Version number (always 42)
+                           42,
+                           # Offset to first IFD
+                           8,
+                           # Number of tags in IFD
+                           8,
+                           # ImageWidth, LONG, 1, width
+                           256, 4, 1, width,
+                           # ImageLength, LONG, 1, lenght
+                           257, 4, 1, height,
+                           # BitsPerSample, SHORT, 1, 1
+                           258, 3, 1, 1,
+                           # Compression, SHORT, 1, 4 = CCITT Group 4 fax encoding
+                           259, 3, 1, compression, 
+                           # Threshholding, SHORT, 1, 0 = WhiteIsZero          
+                           262, 3, 1, 0,  
+                           # StripOffsets, LONG, 1, len of header
+                           273, 4, 1, struct.calcsize(tiff_header_struct),
+                           # RowsPerStrip, LONG, 1, lenght  
+                           278, 4, 1, height,
+                           # StripByteCounts, LONG, 1, size of image
+                           279, 4, 1, data_size, 
+                           # last IFD         
+                           0
+                          )
 
     def _extract_ccitt_fax(self, image_object):
         '''
@@ -439,7 +458,10 @@ class PdfImageExtractor(object):
         #length = 4711
         compression_map = {-1: 4, 0: 2, 1: 3}
         compression = compression_map[image_object['/DecodeParms']['/K']]
-        tiff_header = self._generate_tiff_header_for_ccitt_fax(width, height, len(data), compression)
+        tiff_header = self._generate_tiff_header_for_ccitt_fax(width,
+                                                               height,
+                                                               len(data),
+                                                               compression)
         return Image.open(BytesIO(tiff_header + data))
         
     def _extract_jpg_data(self, image_object):
@@ -497,7 +519,7 @@ class PdfImageExtractor(object):
                 self.logger.debug("No /XObject in /Resources.")
                 return image_objects
         except PdfReadError as error:
-            self.logger.debug("PdfReadError: %s" % error)
+            self.logger.debug("PdfReadError: %s", error)
             return image_objects
 
         x_object = page['/Resources']['/XObject'].getObject()
@@ -527,7 +549,8 @@ class DocumentFileManager(object):
         self.path_handler = {THUMBNAIL: self._get_thumb_path,
                              DISPLAY_IMAGE: self._get_display_path,
                              DOCUMENT_PDF: self._get_pdf_path}
-        self.logger = logging.getLogger("alexandriabase.services.documentfilemanager.DocumentFileManager")
+        self.logger = logging.getLogger(
+            "alexandriabase.services.documentfilemanager.DocumentFileManager")
 
     def delete_file(self, document_file_info):
         '''
@@ -555,10 +578,10 @@ class DocumentFileManager(object):
         referenced file. Raises a DocumentFileNotFound exception
         if not found.
         '''
-        self.logger.debug("Searching for file %s" % document_file_info)
+        self.logger.debug("Searching for file %s", document_file_info)
         basedir_path = self._create_basedir_path(document_file_info)
         
-        self.logger.debug("Searching in %s" % basedir_path)
+        self.logger.debug("Searching in %s", basedir_path)
         if os.path.isfile(basedir_path):
             return basedir_path
 
@@ -566,7 +589,7 @@ class DocumentFileManager(object):
 
         for archive in self.archives:
             archive_path = os.path.join(archive, expanded_short_path)
-            self.logger.debug("Searching in %s" % archive_path)
+            self.logger.debug("Searching in %s", archive_path)
             if os.path.isfile(archive_path):
                 return archive_path
         raise DocumentFileNotFound(document_file_info)

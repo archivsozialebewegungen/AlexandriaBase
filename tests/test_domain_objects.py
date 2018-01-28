@@ -6,6 +6,8 @@ from alexandriabase.domain import InvalidChildException, InvalidDateException, A
     EventType, EventTypeIdentifier, Tree, Node,\
     NoSuchNodeException
 import pytest
+import io
+import logging
 
 
 class AlexDateTests(unittest.TestCase):
@@ -282,12 +284,20 @@ class TreeBuildingTest(unittest.TestCase):
         self.assertTreeStructure(tree)
         
     def test_build_tree_with_bad_entity(self):
-        
+      
+        # Prepare the logger  
+        stream = io.StringIO()
+        log = logging.getLogger()
+        handler = logging.StreamHandler(stream)
+        log.addHandler(handler)
+
         self.entities.append(self.bad_entity)
-        print("Expected errormessage: ", end="")
+        # This should ignore the bad entity and log an error
         tree = Tree(self.entities)
-        # Should just ignore the bad entity and write an errormessage to the console
+
         self.assertTreeStructure(tree)
+        self.assertEqual(stream.getvalue(), 
+                         "Error: Corrupt tree structure. Can't find parent for tree node String representation (9)!\n")
 
     def assertTreeStructure(self, tree):
         

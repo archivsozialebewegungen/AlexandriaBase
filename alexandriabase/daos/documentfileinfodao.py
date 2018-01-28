@@ -30,6 +30,7 @@ class DocumentFileInfoDao(EntityDao):
         self.creator_provider = creator_provider
         self.table = DOCUMENT_TABLE
 
+    # pylint: disable=arguments-differ
     def get_by_id(self, document_file_id):
         query = select([self.table])\
             .where(and_(self.table.c.laufnr == document_file_id,  
@@ -79,8 +80,7 @@ class DocumentFileInfoDao(EntityDao):
         row = self._get_exactly_one_row(query)
         if row[0] is None:
             return 1
-        else:
-            return row[0] + 1  
+        return row[0] + 1  
 
     def _get_next_id(self):
         '''
@@ -90,6 +90,7 @@ class DocumentFileInfoDao(EntityDao):
         row = self._get_exactly_one_row(query)
         return row[0] + 1  
 
+    # pylint: disable=arguments-differ
     def _insert(self, file_info):
         # pylint: disable=protected-access
         file_info._id = self._get_next_id()
@@ -105,6 +106,7 @@ class DocumentFileInfoDao(EntityDao):
         self.connection.execute(insert_statement)
         return file_info
 
+    # pylint: disable=arguments-differ
     def _update(self, file_info):
         update_statement = update(self.table).\
             where(self.table.c.laufnr == file_info.id).\
@@ -117,6 +119,7 @@ class DocumentFileInfoDao(EntityDao):
         self.connection.execute(update_statement)
         return file_info
 
+    # pylint: disable=arguments-differ
     def _delete(self, document_file_id):
         '''
         Deletes a file info. Might result in deleting a record,

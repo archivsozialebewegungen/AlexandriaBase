@@ -11,6 +11,9 @@ from alexandriabase import baseinjectorkeys as injectorkeys
 from alexandriabase.config import Config
 
 def get_this_directory():
+    '''
+    Get the directory where this module is located in.
+    '''
 
     this_module = get_locale_dir.__module__
     this_file = os.path.abspath(sys.modules[this_module].__file__)
@@ -35,6 +38,7 @@ def get_font_dir():
     return os.path.join(get_this_directory(), 'fonts')
 
 # Must be done after installing gettext
+# pylint: disable=wrong-import-position
 from alexandriabase.daos.basiccreatorprovider import BasicCreatorProvider
 
 class AlexBaseModule(Module):

@@ -4,14 +4,12 @@ Created on 11.10.2015
 @author: michael
 '''
 from injector import inject
-from sqlalchemy.sql.expression import select, insert, and_, delete, update, or_
-from sqlalchemy.sql.functions import func
+from sqlalchemy.sql.expression import select, insert, and_, delete
 
 from alexandriabase import baseinjectorkeys
 from alexandriabase.daos.basedao import GenericDao, combine_expressions
 from alexandriabase.daos.metadata import DOCUMENT_EVENT_REFERENCE_TABLE, DOCUMENT_TABLE,\
     EVENT_TABLE
-from alexandriabase.domain import EventFilter, DocumentFilter
 
 class DocumentEventRelationsDao(GenericDao):
     '''
@@ -20,14 +18,17 @@ class DocumentEventRelationsDao(GenericDao):
     
     @inject
     def __init__(self, 
-                 db_engine: baseinjectorkeys.DB_ENGINE_KEY,
-                 document_filter_expression_builder: baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY,
-                 event_filter_expression_builder: baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY):
+                 db_engine:
+                 baseinjectorkeys.DB_ENGINE_KEY,
+                 document_filter_expression_builder:
+                 baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY,
+                 event_filter_expression_builder:
+                 baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY):
         super().__init__(db_engine)
         self.deref_table = DOCUMENT_EVENT_REFERENCE_TABLE
         self.doc_table = DOCUMENT_TABLE
         self.event_table = EVENT_TABLE
-        self.document_filter_expression_builder = document_filter_expression_builder
+        self.doc_filter_expression_builder = document_filter_expression_builder
         self.event_filter_expression_builder = event_filter_expression_builder
         
     # TODO: clean up the references and use pages instead of file ids
@@ -101,19 +102,22 @@ class DocumentEventRelationsDao(GenericDao):
         join = self.doc_table.outerjoin(
             self.deref_table,
             self.deref_table.c.laufnr == self.doc_table.c.hauptnr).outerjoin(
-            self.event_table,
-            self.event_table.c.ereignis_id == self.deref_table.c.ereignis_id)        
-        query = select([self.doc_table.c.hauptnr, self.deref_table.c.ereignis_id]).distinct().select_from(join)
+                self.event_table,
+                self.event_table.c.ereignis_id == self.deref_table.c.ereignis_id)        
+        query = select([self.doc_table.c.hauptnr, self.deref_table.c.ereignis_id]).\
+            distinct().select_from(join)
         where_clauses = []
         
-        event_where = self.event_filter_expression_builder.create_filter_expression(document_event_reference_filter)
+        event_where = self.event_filter_expression_builder.\
+            create_filter_expression(document_event_reference_filter)
         if event_where is not None:
             where_clauses.append(event_where)
-        document_where = self.document_filter_expression_builder.create_filter_expression(document_event_reference_filter)
+        document_where = self.doc_filter_expression_builder.\
+            create_filter_expression(document_event_reference_filter)
         if document_where is not None:
             where_clauses.append(document_where)
         
-        if len(where_clauses) > 0:
+        if where_clauses:
             query = query.where(combine_expressions(where_clauses, and_))
 
         references = {}

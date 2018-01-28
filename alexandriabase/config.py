@@ -147,7 +147,8 @@ class Config:
         for child in node.childNodes:
             if child.nodeType == node.TEXT_NODE:
                 return child.data
-
+        return ''
+    
     def _get_string_value(self, key):
         '''
         Gets the raw single value for a key.
@@ -240,8 +241,10 @@ class Config:
     filetypeviewers = property(lambda self: self._get_map_value('filetypeviewers'), 
                                lambda self, value: self._set_map_value('filetypeviewers', value))
     logdir = property(lambda self: self._get_string_value('logdir'), 
-                               lambda self, value: self._set_string_value('logdir', value))
+                      lambda self, value: self._set_string_value('logdir', value))
     djangodb = property(lambda self: self._get_string_value('djangodb'), 
-                               lambda self, value: self._set_string_value('djangodb', value))
+                        lambda self, value: self._set_string_value('djangodb', value))
     additional_modules = property(lambda self: self._get_list_value('additional_modules'), 
-                         lambda self, value: self._set_list_value('additional_modules', value))
+                                  lambda self, value: self._set_list_value('additional_modules',
+                                                                           value))
+    

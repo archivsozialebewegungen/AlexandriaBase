@@ -50,7 +50,9 @@ class DaoModule(Module):
     @provider
     @singleton
     @inject
-    def create_database_engine(self, config_service: baseinjectorkeys.CONFIG_KEY) -> baseinjectorkeys.DB_ENGINE_KEY:
+    def create_database_engine(self,
+                               config_service:
+                               baseinjectorkeys.CONFIG_KEY) -> baseinjectorkeys.DB_ENGINE_KEY:
         '''
         Creates the database engine from configuration information
         '''

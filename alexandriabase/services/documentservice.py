@@ -27,7 +27,8 @@ class DocumentService(BaseRecordService):
                  document_file_provider: baseinjectorkeys.DOCUMENT_FILE_PROVIDER,
                  ereignis_dao: baseinjectorkeys.EVENT_DAO_KEY,
                  file_format_service: baseinjectorkeys.FILE_FORMAT_SERVICE,
-                 filter_expression_builder: baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY):
+                 filter_expression_builder:
+                 baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY):
         # pylint: disable=too-many-arguments
         BaseRecordService.__init__(self, dokument_dao, filter_expression_builder)
         self.document_file_info_dao = document_file_info_dao
@@ -95,6 +96,7 @@ class DocumentService(BaseRecordService):
         self.document_file_manager.delete_file(document_file_info)
         self.document_file_info_dao.delete(document_file_info.id)
 
+    # pylint: disable=arguments-differ
     def delete(self, document):
         '''
         Deletes all the document files and all the database information
@@ -180,7 +182,8 @@ class DocumentService(BaseRecordService):
                 file_info = self._set_default_resolution(file_info)
         
         return file_info
-        
+    
+    # pylint: disable=no-self-use    
     def _set_default_resolution(self, file_info):    
         if file_info.filetype == 'jpg':
             file_info.resolution = 72

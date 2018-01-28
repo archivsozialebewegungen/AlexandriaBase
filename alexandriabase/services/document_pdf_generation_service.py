@@ -5,26 +5,31 @@ Created on 07.05.2016
 '''
 import codecs
 import re
-from injector import inject
 from io import BytesIO
+from injector import inject
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm, inch
 from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.platypus.flowables import Image
 from reportlab.platypus.paragraph import Paragraph
-
-from alexandriabase import baseinjectorkeys
 from PyPDF2.merger import PdfFileMerger
 
+from alexandriabase import baseinjectorkeys
+
 # Patching PyPDF2
-
-from PyPDF2.pdf import ContentStream
-from PyPDF2.generic import DictionaryObject, readObject
-from PyPDF2.utils import readNonWhitespace, b_
+# pylint: disable=wrong-import-order
+# pylint: disable=ungrouped-imports
 import PyPDF2.utils as utils
+from PyPDF2.generic import DictionaryObject, readObject
+from PyPDF2.pdf import ContentStream
+from PyPDF2.utils import readNonWhitespace, b_
 
-def readInlineImagePatch(self, stream):
+def read_inline_image_patch(self, stream):
+    '''
+    Overrides the _readInlineImage method in the
+    ContentStream class to speed up data reading
+    '''
     # begin reading just after the "BI" - begin image
     # first read the dictionary of settings.
     settings = DictionaryObject()
@@ -42,11 +47,17 @@ def readInlineImagePatch(self, stream):
     # left at beginning of ID
     tmp = stream.read(3)
     assert tmp[:2] == b_("ID")
-    #data = self._readImageData(stream)
+    # pylint: disable=protected-access
     data = self._readImagaDataFast(stream)
     return {"settings": settings, "data": data}
 
-def readImagaDataFast(self, stream):
+def read_imaga_data_fast(self, stream):
+    '''
+    Buffered reading of image data. The unpatched version
+    did read byte by byte which is incredible slow on large
+    images.
+    '''
+    # pylint: disable=unused-argument
     # We keep more than buffersize bytes in the buffer because the
     # end of image sequence might overlap. So we search some data twice,
     # but this is still far more effective than the old algorithm
@@ -56,20 +67,25 @@ def readImagaDataFast(self, stream):
     data = b_("")
        
     buffer = stream.read(buffersize+buffertail)
-       
-    while True:
+    
+    end_of_image = False   
+    while not end_of_image:
+        
         match = regex.match(buffer)
         if match:
             data += buffer[:len(match.group(1))]
             stream.seek(-1 * (len(buffer) - len(match.group(1)) - len(match.group(2))), 1)
-            return data
-        if len(buffer) < buffersize + buffertail: # We already have exhausted the stream
-            raise utils.PdfReadError("Didn't find end of image marker!")
-        data += buffer[:buffersize]
-        buffer = buffer[buffersize:] + stream.read(buffersize)
+            end_of_image = True
+        else:
+            if len(buffer) < buffersize + buffertail: # We already have exhausted the stream
+                raise utils.PdfReadError("Didn't find end of image marker!")
+            data += buffer[:buffersize]
+            buffer = buffer[buffersize:] + stream.read(buffersize)
 
-ContentStream._readInlineImage = readInlineImagePatch
-ContentStream._readImageDataFast = readImagaDataFast 
+    return data
+#pylint: disable=protected-access
+ContentStream._readInlineImage = read_inline_image_patch
+ContentStream._readImageDataFast = read_imaga_data_fast 
 
 # End of patchinv PyPDF2
 
@@ -323,13 +339,13 @@ class DocumentPdfGenerationService(object):
         for file_info in file_infos:
             
             if file_info.filetype == 'pdf':
-                if len(story) > 0:
+                if story:
                     pdf_list.append(self._build_pdf(story, margins))
                     story = []
                 path = self.document_file_manager.get_file_path(file_info)
-                f = open(path, "rb")
-                pdf_list.append(f.read())
-                f.close()
+                file = open(path, "rb")
+                pdf_list.append(file.read())
+                file.close()
                 continue
             
             if file_info.filetype in self.pdf_handlers.keys():
@@ -338,7 +354,7 @@ class DocumentPdfGenerationService(object):
             else:
                 story = self._add_no_handler_warning(story, file_info)
         
-        if len(story) > 0:
+        if story:
             pdf_list.append(self._build_pdf(story, margins))
         
         return self._join_pdfs(pdf_list)

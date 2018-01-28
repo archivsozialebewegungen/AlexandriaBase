@@ -24,6 +24,7 @@ class CreatorDao(CachingDao):
 
 
 
+    # pylint: disable=arguments-differ
     def get_by_id(self, creator_id):
 
         if creator_id in self.cache:
@@ -54,6 +55,7 @@ class CreatorDao(CachingDao):
         '''
         return self.find(self.table.c.anzeige == 'y')
 
+    # pylint: disable=arguments-differ
     def _update(self, creator):
         query = update(self.table)\
             .values(name=creator.name,
@@ -62,6 +64,7 @@ class CreatorDao(CachingDao):
         self.connection.execute(query)
         return creator
 
+    # pylint: disable=arguments-differ
     def _insert(self, creator):
         # pylint: disable=protected-access
         creator._id = self._get_next_id()
