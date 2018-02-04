@@ -276,7 +276,7 @@ class DocumentFilter(GenericFilter):
     '''
     def __init__(self):
         super().__init__()
-        self.location = None
+        self.signature = None
         self.filetype = None
         self.document_type = None
         self.start_date = None

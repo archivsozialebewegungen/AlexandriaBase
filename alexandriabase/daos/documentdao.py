@@ -26,19 +26,19 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
     # pylint: disable=arguments-differ
     def _create_expressions(self, document_filter):
         super()._create_expressions(document_filter)
-        self._append_expression(self._build_location_expression(document_filter))
+        self._append_expression(self._build_signature_expression(document_filter))
         self._append_expression(self._build_filetype_expression(document_filter))
         self._append_expression(self._build_document_type_expression(document_filter))
 
-    def _build_location_expression(self, document_filter):
+    def _build_signature_expression(self, document_filter):
         '''
-        Creates a location expression.
+        Creates a signature expression.
         '''
-        if not document_filter.location:
+        if not document_filter.signature:
             return None
-        location = document_filter.location.upper()
-        return or_(self.table.c.standort == location,
-                   self.table.c.standort.startswith("%s." % location))
+        signature = document_filter.signature.upper()
+        return or_(self.table.c.standort == signature,
+                   self.table.c.standort.startswith("%s." % signature))
 
     def _build_filetype_expression(self, document_filter):
         '''

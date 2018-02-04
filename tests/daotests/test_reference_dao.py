@@ -118,7 +118,7 @@ class TestRelationsDao(DatabaseBaseTest):
     def test_fetch_doc_and_event_ids_V(self):
         
         der_filter = DocumentEventReferenceFilter()
-        der_filter.location='1.1.ii'
+        der_filter.signature='1.1.ii'
         references = self.dao.fetch_doc_event_references(der_filter)
         self.assertEqual(1, len(references.keys()))
         self.assertEqual(2, len(references[4]))
@@ -129,7 +129,7 @@ class TestRelationsDao(DatabaseBaseTest):
     def test_fetch_doc_and_event_ids_VI(self):
         
         der_filter = DocumentEventReferenceFilter()
-        der_filter.location='1.1.I'
+        der_filter.signature='1.1.I'
         references = self.dao.fetch_doc_event_references(der_filter)
         self.assertEqual(1, len(references.keys()))
         self.assertEqual(1, len(references[1]))

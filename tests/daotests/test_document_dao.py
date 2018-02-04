@@ -204,9 +204,9 @@ class TestDocumentDao(DatabaseBaseTest):
         document = self.dao.get_last(filter_expression)
         self.assertEqual(document.id, 8)
 
-    def testLocationFiltering(self):
+    def testSignatureFiltering(self):
         document_filter = DocumentFilter()
-        document_filter.location = "1.1"
+        document_filter.signature = "1.1"
         filter_expression = self.document_filter_handler.create_filter_expression(document_filter)
         document = self.dao.get_last(filter_expression)
         self.assertEqual(4, document.id)
@@ -238,7 +238,7 @@ class TestDocumentDao(DatabaseBaseTest):
 
     def testCombinedFiltering(self):
         document_filter = DocumentFilter()
-        document_filter.location = "1.1"
+        document_filter.signature = "1.1"
         document_filter.searchterms = ["rstes"]
         filter_expression = self.document_filter_handler.create_filter_expression(document_filter)
         document = self.dao.get_last(filter_expression)
