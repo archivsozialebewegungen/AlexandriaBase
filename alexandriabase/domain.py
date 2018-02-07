@@ -3,8 +3,9 @@ Created on 01.02.2015
 
 @author: michael
 '''
-from datetime import date
 import logging
+from datetime import date
+from alexandriabase import _
 
 def expand_id(identifier):
     '''

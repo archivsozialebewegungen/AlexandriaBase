@@ -1,6 +1,6 @@
 import unittest
 
-from alexandriabase.base_exceptions import DataError
+from alexandriabase import _
 from alexandriabase.domain import InvalidChildException, InvalidDateException, AlexDate, \
     AlexDateRange, Creator, DocumentType, Event, DocumentFileInfo, Document, \
     EventType, EventTypeIdentifier, Tree, Node,\

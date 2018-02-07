@@ -34,7 +34,7 @@ from reportlab.platypus.flowables import Image as PdfImage
 
 from sqlalchemy.sql.expression import text, update, select
 
-from alexandriabase import baseinjectorkeys, get_font_dir
+from alexandriabase import _, baseinjectorkeys, fontdir
 from alexandriabase.base_exceptions import NoSuchEntityException
 from alexandriabase.daos import CURRENT_VERSION, REGISTRY_TABLE
 from alexandriabase.domain import PaginatedResult, Document, Tree, EventType,\
@@ -796,7 +796,7 @@ class FileProvider():
 
     def _create_no_thumbnail_image(self, document_file_info):
         img = Image.new('P', (400, 440), color=255)
-        font = ImageFont.truetype(os.path.join(get_font_dir(), "Arial_Bold.ttf"), 48)
+        font = ImageFont.truetype(os.path.join(fontdir, "Arial_Bold.ttf"), 48)
         draw = ImageDraw.Draw(img)
         draw.text((10, 60), "Keine Vorschau", font=font, fill=0)
         draw.text((10, 120), "für Datei", font=font, fill=0)
@@ -805,7 +805,7 @@ class FileProvider():
 
     def _create_no_display_image(self, document_file_info):
         img = Image.new('P', (400, 440), color=255)
-        font = ImageFont.truetype(os.path.join(get_font_dir(), "Arial_Bold.ttf"), 48)
+        font = ImageFont.truetype(os.path.join(fontdir, "Arial_Bold.ttf"), 48)
         draw = ImageDraw.Draw(img)
         draw.text((10, 60), "Keine Graphik", font=font, fill=0)
         draw.text((10, 120), "für Datei", font=font, fill=0)

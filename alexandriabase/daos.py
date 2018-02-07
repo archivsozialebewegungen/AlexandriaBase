@@ -8,6 +8,7 @@ from sqlalchemy.sql.expression import or_, select, and_, delete, insert, update
 from sqlalchemy.sql.functions import func
 from _functools import reduce
 
+from alexandriabase import _
 from alexandriabase.base_exceptions import NoSuchEntityException, DataError
 from injector import inject, singleton, provider, ClassProvider, Module
 from alexandriabase import baseinjectorkeys
@@ -1522,6 +1523,8 @@ class DaoModule(Module):
     Injector module to bind the dao keys
     '''
     def configure(self, binder):
+        binder.bind(baseinjectorkeys.CREATOR_PROVIDER_KEY,
+                    ClassProvider(BasicCreatorProvider), scope=singleton)
         binder.bind(baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY,
                     ClassProvider(EventFilterExpressionBuilder), scope=singleton)
         binder.bind(baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY,
