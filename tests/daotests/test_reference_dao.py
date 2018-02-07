@@ -3,15 +3,12 @@ Created on 11.10.2015
 
 @author: michael
 '''
-from sqlalchemy.sql.expression import select
 import unittest
 
-from alexandriabase.daos.metadata import DOCUMENT_TABLE
-from alexandriabase.daos.relationsdao import DocumentEventRelationsDao
 from alexandriabase.domain import AlexDate, DocumentEventReferenceFilter
 from daotests.test_base import DatabaseBaseTest
-from alexandriabase.daos.documentdao import DocumentFilterExpressionBuilder
-from alexandriabase.daos.eventdao import EventFilterExpressionBuilder
+from alexandriabase.daos import DocumentEventRelationsDao,\
+    EventFilterExpressionBuilder, DocumentFilterExpressionBuilder
 
 
 class TestRelationsDao(DatabaseBaseTest):

@@ -27,7 +27,7 @@ def get_locale_dir():
         
     return os.path.join(get_this_directory(), 'locale')
 
-gettext.install('alexandriabase', get_locale_dir())
+gettext.install('alexandria', get_locale_dir())
 
 def get_font_dir():
     '''
@@ -39,7 +39,7 @@ def get_font_dir():
 
 # Must be done after installing gettext
 # pylint: disable=wrong-import-position
-from alexandriabase.daos.basiccreatorprovider import BasicCreatorProvider
+from alexandriabase.daos import BasicCreatorProvider
 
 class AlexBaseModule(Module):
     '''

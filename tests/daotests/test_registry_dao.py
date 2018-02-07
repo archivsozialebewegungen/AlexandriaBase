@@ -5,9 +5,8 @@ Created on 11.10.2015
 '''
 import unittest
 
-from alexandriabase.base_exceptions import NoSuchEntityException
 from daotests.test_base import DatabaseBaseTest
-from alexandriabase.daos.registry_dao import RegistryDao
+from alexandriabase.daos import RegistryDao
 
 
 class TestRegistryDao(DatabaseBaseTest):

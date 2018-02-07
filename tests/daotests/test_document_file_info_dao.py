@@ -6,12 +6,9 @@ Created on 02.11.2015
 import unittest
 
 from alexandriabase.base_exceptions import NoSuchEntityException
-from alexandriabase.daos.basiccreatorprovider import BasicCreatorProvider
-from alexandriabase.daos.creatordao import CreatorDao
-from alexandriabase.daos.documentdao import DocumentDao
-from alexandriabase.daos.documentfileinfodao import DocumentFileInfoDao
-from alexandriabase.daos.documenttypedao import DocumentTypeDao
 from daotests.test_base import DatabaseBaseTest
+from alexandriabase.daos import CreatorDao, BasicCreatorProvider,\
+    DocumentFileInfoDao, DocumentTypeDao, DocumentDao
 
 
 class DocumentFileInfoDaoTest(DatabaseBaseTest):

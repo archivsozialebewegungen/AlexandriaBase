@@ -12,7 +12,7 @@ from tempfile import NamedTemporaryFile
 
 from sqlalchemy import text
 from alexandriabase.config import Config
-from alexandriabase.daos.metadata import ALEXANDRIA_METADATA
+from alexandriabase.daos import ALEXANDRIA_METADATA
 from alexandriabase.domain import DocumentFileInfo
 
 

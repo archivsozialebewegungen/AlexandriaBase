@@ -7,18 +7,13 @@ from datetime import date
 import unittest
 
 from alexandriabase.base_exceptions import NoSuchEntityException
-from alexandriabase.daos.basiccreatorprovider import BasicCreatorProvider
-from alexandriabase.daos.creatordao import CreatorDao
-from alexandriabase.daos.documentdao import DocumentDao,\
-    DocumentFilterExpressionBuilder
-from alexandriabase.daos.documenttypedao import DocumentTypeDao
-from alexandriabase.daos.eventdao import EventDao, \
-    EventFilterExpressionBuilder
-from alexandriabase.daos.eventtypedao import EventTypeDao
 from alexandriabase.domain import EventFilter, Event, AlexDateRange, \
     AlexDate
 from daotests.test_base import DatabaseBaseTest
-from alexandriabase.daos.relationsdao import DocumentEventRelationsDao
+from alexandriabase.daos import CreatorDao, DocumentTypeDao,\
+    DocumentEventRelationsDao, DocumentFilterExpressionBuilder,\
+    EventFilterExpressionBuilder, EventTypeDao, BasicCreatorProvider, EventDao,\
+    DocumentDao
 
 
 class TestEreignisDao(DatabaseBaseTest):
@@ -33,15 +28,15 @@ class TestEreignisDao(DatabaseBaseTest):
         ereignistyp_dao = EventTypeDao(self.engine)
         creator_provider = BasicCreatorProvider(erfasser_dao)
         self.dao = EventDao(self.engine,
-                               erfasser_dao,
-                               self.references_dao,
-                               ereignistyp_dao,
-                               creator_provider)
+                            erfasser_dao,
+                            self.references_dao,
+                            ereignistyp_dao,
+                            creator_provider)
         self.dokument_dao = DocumentDao(self.engine,
-                               None,
-                               erfasser_dao,
-                               creator_provider,
-                               document_type_dao)
+                                        None,
+                                        erfasser_dao,
+                                        creator_provider,
+                                        document_type_dao)
 
     def testCompleteMappingAndGetFirst(self):
         ereignis = self.dao.get_first()

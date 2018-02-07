@@ -6,7 +6,7 @@ Created on 11.10.2015
 import unittest
 
 from alexandriabase.base_exceptions import NoSuchEntityException
-from alexandriabase.daos.creatordao import CreatorDao
+from alexandriabase.daos import CreatorDao
 from alexandriabase.domain import Creator
 from daotests.test_base import DatabaseBaseTest
 

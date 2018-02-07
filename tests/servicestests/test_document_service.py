@@ -9,16 +9,11 @@ from unittest.mock import MagicMock, call
 
 from alex_test_utils import get_testfiles_dir, TestEnvironment, MODE_FULL
 from alexandriabase.config import Config
-from alexandriabase.daos.documentdao import DocumentDao, \
-    DocumentFilterExpressionBuilder
-from alexandriabase.daos.documentfileinfodao import DocumentFileInfoDao
-from alexandriabase.daos.eventdao import EventDao
 from alexandriabase.domain import Document, DocumentFileInfo
-from alexandriabase.services.documentfilemanager import DocumentFileManager,\
-    DocumentFileNotFound, FileProvider
-from alexandriabase.services.documentservice import DocumentService
-from alexandriabase.services.fileformatservice import FileFormatService
-from alexandriabase.daos.documenttypedao import DocumentTypeDao
+from alexandriabase.daos import EventDao, DocumentDao, DocumentTypeDao,\
+    DocumentFileInfoDao, DocumentFilterExpressionBuilder
+from alexandriabase.services import FileProvider, DocumentFileManager,\
+    FileFormatService, DocumentService, DocumentFileNotFound
 
 class DocumentServiceTest(unittest.TestCase):
 

@@ -6,9 +6,9 @@ Created on 01.04.2016
 import unittest
 from unittest.mock import MagicMock, Mock
 
-from alexandriabase.daos.documenttypedao import DocumentTypeDao
+from alexandriabase.daos import DocumentTypeDao
 from alexandriabase.domain import DocumentType
-from alexandriabase.services.documenttypeservice import DocumentTypeService
+from alexandriabase.services import DocumentTypeService
 
 
 class DocumentTypeServiceTest(unittest.TestCase):

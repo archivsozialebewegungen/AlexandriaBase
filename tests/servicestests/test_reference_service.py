@@ -6,11 +6,9 @@ Created on 21.10.2015
 import unittest
 from unittest.mock import MagicMock
 
-from alexandriabase.daos.documentdao import DocumentDao
-from alexandriabase.daos.eventdao import EventDao
-from alexandriabase.daos.relationsdao import DocumentEventRelationsDao
 from alexandriabase.domain import Document, Event
-from alexandriabase.services.referenceservice import ReferenceService
+from alexandriabase.daos import EventDao, DocumentDao, DocumentEventRelationsDao
+from alexandriabase.services import ReferenceService
 
 
 class Test(unittest.TestCase):

@@ -5,7 +5,7 @@ Created on 11.10.2015
 '''
 import unittest
 
-from alexandriabase.daos.eventcrossreferencesdao import EventCrossreferencesDao
+from alexandriabase.daos import EventCrossreferencesDao
 from daotests.test_base import DatabaseBaseTest
 
 

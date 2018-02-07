@@ -6,9 +6,9 @@ Created on 12.03.2016
 import unittest
 from unittest.mock import MagicMock
 
-from alexandriabase.daos.creatordao import CreatorDao
+from alexandriabase.daos import CreatorDao
 from alexandriabase.domain import Creator
-from alexandriabase.services.creatorservice import CreatorService
+from alexandriabase.services import CreatorService
 
 
 class CreatorServiceTest(unittest.TestCase):

@@ -3,12 +3,11 @@ Created on 30.01.2016
 
 @author: michael
 '''
-from PIL import Image
 import os
 import unittest
 
 from alex_test_utils import get_testfiles_dir, TestEnvironment
-from alexandriabase.services.fileformatservice import FileFormatService, \
+from alexandriabase.services import FileFormatService, \
     UnsupportedFileResolution, get_graphic_file_resolution, \
     UnsupportedFileFormat
 

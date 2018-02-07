@@ -4,10 +4,10 @@ Created on 28.06.2016
 @author: michael
 '''
 import unittest
-from alexandriabase.services.database_upgrade_service import DatabaseUpgradeService
+from alexandriabase.services import DatabaseUpgradeService
 from daotests.test_base import DatabaseBaseTest
 
-from alexandriabase.daos.registry_dao import RegistryDao
+from alexandriabase.daos import RegistryDao
 
 
 class DatabaseUpgradeServiceTest(DatabaseBaseTest):

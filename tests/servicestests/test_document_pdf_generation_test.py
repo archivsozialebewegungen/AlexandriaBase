@@ -10,11 +10,10 @@ from unittest.mock import MagicMock, call
 
 from alex_test_utils import get_testfiles_dir, TestEnvironment, MODE_FULL
 from alexandriabase.domain import Document, DocumentFileInfo
-from alexandriabase.services.document_pdf_generation_service import DocumentPdfGenerationService, \
-    GraphicsPdfHandler, TextPdfHandler
-from alexandriabase.services.documentfilemanager import DocumentFileManager
-from alexandriabase.daos.documentfileinfodao import DocumentFileInfoDao
 from PyPDF2.pdf import PdfFileReader
+from alexandriabase.services import DocumentFileManager, GraphicsPdfHandler,\
+    TextPdfHandler, DocumentPdfGenerationService
+from alexandriabase.daos import DocumentFileInfoDao
 
 manual_check = False
 

@@ -6,23 +6,11 @@ Created on 11.10.2015
 from datetime import date
 import unittest
 
-from alexandriabase.daos.basiccreatorprovider import BasicCreatorProvider
-from alexandriabase.daos.creatordao import CreatorDao
-from alexandriabase.daos.documentdao import DocumentDao, \
-    DocumentFilterExpressionBuilder
-from alexandriabase.daos.documenttypedao import DocumentTypeDao
-from alexandriabase.daos.eventdao import EventDao, EventFilterExpressionBuilder
-from alexandriabase.daos.eventtypedao import EventTypeDao
 from alexandriabase.domain import Document, DocumentFilter
 from daotests.test_base import DatabaseBaseTest
-import os
-from alex_test_utils import get_testfiles_dir
-from alexandriabase.config import Config
-from alexandriabase.daos.metadata import DOCUMENT_TABLE
-from sqlalchemy.sql.operators import like_op
 from sqlalchemy.sql.expression import or_
-from alexandriabase.daos.relationsdao import DocumentEventRelationsDao
 from alexandriabase import baseinjectorkeys
+from alexandriabase.daos import DocumentFilterExpressionBuilder, DOCUMENT_TABLE
 
 
 class TestDocumentDao(DatabaseBaseTest):

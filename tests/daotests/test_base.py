@@ -12,11 +12,8 @@ from alexandriabase import AlexBaseModule, baseinjectorkeys
 from alex_test_utils import setup_database_schema, load_table_data, clear_table_data, \
     TestEnvironment, MODE_SIMPLE
 from alexandriabase.base_exceptions import NoSuchEntityException, DataError
-from alexandriabase.daos import DaoModule
-from alexandriabase.daos.basedao import EntityDao
-from alexandriabase.daos.creatordao import CreatorDao
-from alexandriabase.daos.metadata import EVENT_TABLE,\
-    EVENT_CROSS_REFERENCES_TABLE
+from alexandriabase.daos import DaoModule, EntityDao,\
+    EVENT_CROSS_REFERENCES_TABLE, EVENT_TABLE, CreatorDao
 from alexandriabase.domain import Entity
 
 

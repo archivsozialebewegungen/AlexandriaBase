@@ -12,7 +12,7 @@ from alexandriabase import baseinjectorkeys, AlexBaseModule
 from alexandriabase.daos import DaoModule
 from alexandriabase.domain import Entity
 from alexandriabase.services import ServiceModule
-from alexandriabase.services.baseservice import BaseRecordService
+from alexandriabase.services import BaseRecordService
 
 
 class TestDaoModuleConfiguration(unittest.TestCase):

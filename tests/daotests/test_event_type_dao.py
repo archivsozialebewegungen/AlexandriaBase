@@ -5,7 +5,7 @@ Created on 11.10.2015
 '''
 import unittest
 
-from alexandriabase.daos.eventtypedao import EventTypeDao
+from alexandriabase.daos import EventTypeDao
 from daotests.test_base import DatabaseBaseTest
 from alexandriabase.domain import EventTypeIdentifier
 

@@ -12,17 +12,15 @@ from io import BytesIO
 from alex_test_utils import get_testfiles_dir, TestEnvironment, MODE_FULL,\
     get_pdf_samples_dir
 from alexandriabase.domain import DocumentFileInfo, Document
-from alexandriabase.services.documentfilemanager import DocumentFileManager, \
+from alexandriabase.services import DocumentFileManager, \
     DocumentFileNotFound, PdfImageExtractor, THUMBNAIL, DISPLAY_IMAGE, DOCUMENT_PDF,\
     FileProvider, DocumentFileImageGenerator, GraphicsImageGenerator,\
     PdfImageGenerator, TextImageGenerator, MovieImageGenerator,\
-    ImageExtractionFailure
+    ImageExtractionFailure, GraphicsPdfHandler, TextPdfHandler,\
+    DocumentPdfGenerationService
 from unittest.mock import MagicMock
-from alexandriabase.daos.documentfileinfodao import DocumentFileInfoDao
-from alexandriabase.services.document_pdf_generation_service import DocumentPdfGenerationService, \
-    GraphicsPdfHandler, TextPdfHandler 
 import logging
-from PIL import Image
+from alexandriabase.daos import DocumentFileInfoDao
 
 manual_test = True
 

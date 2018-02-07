@@ -6,20 +6,18 @@ Created on 20.10.2015
 import unittest
 from unittest.mock import MagicMock 
 
-from alexandriabase.daos.eventcrossreferencesdao import EventCrossreferencesDao
-from alexandriabase.daos.eventdao import EventDao, \
-    EventFilterExpressionBuilder
 from alexandriabase.domain import AlexDateRange, Event, \
     alex_date_from_key, EventType, EventTypeIdentifier
-from alexandriabase.services.eventservice import EventService
-from alexandriabase.daos.eventtypedao import EventTypeDao
+from alexandriabase.daos import EventFilterExpressionBuilder,\
+    EventCrossreferencesDao, EventTypeDao, EventDao
+from alexandriabase.services import EventService
 
 
 class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.event_dao = MagicMock(spec=EventDao)  # @UndefinedVariable
+        self.event_dao = MagicMock(spec=EventDao)
         self.filter_expression_builder = MagicMock(spec=EventFilterExpressionBuilder)
         self.event_crossreferences_dao = MagicMock(spec=EventCrossreferencesDao)
         self.event_type_dao = MagicMock(spec=EventTypeDao)

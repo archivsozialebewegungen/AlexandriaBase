@@ -6,7 +6,7 @@ Created on 11.10.2015
 import unittest
 
 from alexandriabase.base_exceptions import NoSuchEntityException
-from alexandriabase.daos.documenttypedao import DocumentTypeDao
+from alexandriabase.daos import DocumentTypeDao
 from alexandriabase.domain import DocumentType
 from daotests.test_base import DatabaseBaseTest
 
