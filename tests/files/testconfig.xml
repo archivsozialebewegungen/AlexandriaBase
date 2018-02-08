@@ -22,8 +22,8 @@
 		<listentry>pdf</listentry>
 	</list>
 	<map key="filetypeviewers">
-		<mapentry key="default">tkgui.documentviewer.defaultviewer.DefaultViewer</mapentry>
-		<mapentry key="tif">tkgui.documentviewer.defaultviewer.DefaultViewer</mapentry>
+		<mapentry key="default">DefaultViewer</mapentry>
+		<mapentry key="tif">GraphicsViewer</mapentry>
 	</map>
 	<map key="filetypealiases">
 		<mapentry key="tiff">tif</mapentry>
