@@ -14,7 +14,7 @@ moduledir = os.path.abspath(os.path.dirname(__file__))
 localedir = os.path.join(moduledir, 'locale')
 fontdir = os.path.join(moduledir, 'fonts')
 
-translate = gettext.translation('handroll', localedir, fallback=True)
+translate = gettext.translation('alexandriabase', localedir, fallback=True)
 _ = translate.gettext
 
 class AlexBaseModule(Module):
