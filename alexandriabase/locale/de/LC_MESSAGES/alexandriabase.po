@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AlexandriaBase\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-05-29 13:17+0200\n"
-"PO-Revision-Date: 2018-02-07 10:47+0100\n"
+"POT-Creation-Date: 2018-02-10 16:44+0100\n"
+"PO-Revision-Date: 2018-02-10 16:44+0100\n"
 "Last-Translator: Michael Koltan <admin@archivsozialebewegungen.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -18,63 +18,61 @@ msgstr ""
 "X-Generator: Poedit 1.8.11\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: alexandriabase/services/eventservice.py:103
-#: alexandriabase/daos/eventtypedao.py:54
+#: alexandriabase/services.py:1664 alexandriabase/daos.py:1286
 msgid "Event types"
 msgstr "Ereignistypen"
 
-#: alexandriabase/domain.py:67 tests/test_domain_objects.py:264
+#: alexandriabase/domain.py:69
 msgid "January"
 msgstr "Januar"
 
-#: alexandriabase/domain.py:67 tests/test_domain_objects.py:264
+#: alexandriabase/domain.py:69
 msgid "February"
 msgstr "Februar"
 
-#: alexandriabase/domain.py:67
+#: alexandriabase/domain.py:69
 msgid "March"
 msgstr "März"
 
-#: alexandriabase/domain.py:68
+#: alexandriabase/domain.py:70
 msgid "April"
 msgstr "April"
 
-#: alexandriabase/domain.py:68
+#: alexandriabase/domain.py:70
 msgid "May"
 msgstr "Mai"
 
-#: alexandriabase/domain.py:68
+#: alexandriabase/domain.py:70
 msgid "June"
 msgstr "Juni"
 
-#: alexandriabase/domain.py:68
+#: alexandriabase/domain.py:70
 msgid "July"
 msgstr "Juli"
 
-#: alexandriabase/domain.py:68
+#: alexandriabase/domain.py:70
 msgid "August"
 msgstr "August"
 
-#: alexandriabase/domain.py:69
+#: alexandriabase/domain.py:71
 msgid "September"
 msgstr "September"
 
-#: alexandriabase/domain.py:69
+#: alexandriabase/domain.py:71
 msgid "October"
 msgstr "Oktober"
 
-#: alexandriabase/domain.py:69
+#: alexandriabase/domain.py:71
 msgid "November"
 msgstr "November"
 
-#: alexandriabase/domain.py:70
+#: alexandriabase/domain.py:72
 msgid "Dezember"
 msgstr "Dezember"
 
-#: alexandriabase/domain.py:417 tests/test_domain_objects.py:356
+#: alexandriabase/domain.py:430
 msgid "New document"
 msgstr "Neues Dokument"
 
-#: alexandriabase/daos/systematicdao.py:52
-msgid "Archiv soziale Bewegungen"
-msgstr "Archiv Soziale Bewegungen"
+#~ msgid "Archiv soziale Bewegungen"
+#~ msgstr "Archiv Soziale Bewegungen"

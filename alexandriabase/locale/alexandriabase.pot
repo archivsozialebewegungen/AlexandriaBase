@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-07 10:45+0100\n"
+"POT-Creation-Date: 2018-02-10 16:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,58 +17,58 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: alexandriabase/services.py:1664 alexandriabase/daos.py:1285
+#: alexandriabase/services.py:1664 alexandriabase/daos.py:1286
 msgid "Event types"
 msgstr ""
 
-#: alexandriabase/domain.py:68
+#: alexandriabase/domain.py:69
 msgid "January"
 msgstr ""
 
-#: alexandriabase/domain.py:68
+#: alexandriabase/domain.py:69
 msgid "February"
 msgstr ""
 
-#: alexandriabase/domain.py:68
+#: alexandriabase/domain.py:69
 msgid "March"
 msgstr ""
 
-#: alexandriabase/domain.py:69
+#: alexandriabase/domain.py:70
 msgid "April"
 msgstr ""
 
-#: alexandriabase/domain.py:69
+#: alexandriabase/domain.py:70
 msgid "May"
 msgstr ""
 
-#: alexandriabase/domain.py:69
+#: alexandriabase/domain.py:70
 msgid "June"
 msgstr ""
 
-#: alexandriabase/domain.py:69
+#: alexandriabase/domain.py:70
 msgid "July"
 msgstr ""
 
-#: alexandriabase/domain.py:69
+#: alexandriabase/domain.py:70
 msgid "August"
 msgstr ""
 
-#: alexandriabase/domain.py:70
+#: alexandriabase/domain.py:71
 msgid "September"
 msgstr ""
 
-#: alexandriabase/domain.py:70
+#: alexandriabase/domain.py:71
 msgid "October"
 msgstr ""
 
-#: alexandriabase/domain.py:70
+#: alexandriabase/domain.py:71
 msgid "November"
 msgstr ""
 
-#: alexandriabase/domain.py:71
+#: alexandriabase/domain.py:72
 msgid "Dezember"
 msgstr ""
 
-#: alexandriabase/domain.py:429
+#: alexandriabase/domain.py:430
 msgid "New document"
 msgstr ""
