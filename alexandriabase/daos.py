@@ -645,7 +645,19 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         self._append_expression(self._build_signature_expression(document_filter))
         self._append_expression(self._build_filetype_expression(document_filter))
         self._append_expression(self._build_document_type_expression(document_filter))
+        self._append_expression(self._build_missing_event_link_expression(document_filter))
+        
+    def _build_missing_event_link_expression(self, document_filter):
+        
+        if not document_filter.missing_event_link:
+            return None
+        
+        subquery = select([func.count(DOCUMENT_EVENT_REFERENCE_TABLE.c.laufnr)])\
+            .where(self.table.c.laufnr == DOCUMENT_EVENT_REFERENCE_TABLE.c.laufnr)\
+            .as_scalar()
 
+        return and_(subquery == 0, self.table.c.seite == 1)            
+        
     def _build_signature_expression(self, document_filter):
         '''
         Creates a signature expression.

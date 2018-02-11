@@ -192,6 +192,15 @@ class TestDocumentDao(DatabaseBaseTest):
         document = self.dao.get_last(filter_expression)
         self.assertEqual(document.id, 8)
 
+    def test_filtering_6(self):
+        document_filter = DocumentFilter()
+        document_filter.missing_event_link = True
+        filter_expression = self.document_filter_handler.create_filter_expression(document_filter)
+        document = self.dao.get_first(filter_expression)
+        for doc_id in (8, 11, 12, 13, 14, 8):
+            self.assertEqual(document.id, doc_id)
+            document = self.dao.get_next(document, filter_expression)
+        
     def testSignatureFiltering(self):
         document_filter = DocumentFilter()
         document_filter.signature = "1.1"

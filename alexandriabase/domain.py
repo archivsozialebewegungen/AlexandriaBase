@@ -282,6 +282,7 @@ class DocumentFilter(GenericFilter):
         self.document_type = None
         self.start_date = None
         self.end_date = None
+        self.missing_event_link = False
 
 class EventFilter(GenericFilter):
     '''
