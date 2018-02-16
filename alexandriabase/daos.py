@@ -114,6 +114,15 @@ def get_foreign_keys(primary_key):
                 foreign_keys.append(foreign_key.parent)
     return foreign_keys
 
+def get_table_from_expression(expression):
+    
+    if hasattr(expression, '_from_objects') and expression._from_objects:
+        return expression._from_objects[0]
+    
+    if hasattr(expression, 'clauses') and expression.clauses:
+        return get_table_from_expression(expression.clauses[0])
+    
+    raise Exception("Don't know how to extract table")
 def combine_expressions(expressions, method):
     '''
     Combines the different expressions with and.
@@ -346,61 +355,48 @@ class EntityDao(GenericDao):
 
     def get_first(self, filter_expression=None):
         ''' Get the first entity or None if no entity exists or is allowed by filter.'''
-        subquery = select([func.min(self.primary_key)])  # @UndefinedVariable
-        if not isinstance(filter_expression, type(None)):
-            subquery = subquery.where(filter_expression)
-        query = select([self.primary_key.table])\
-            .where(self.primary_key == subquery)  # @UndefinedVariable
-        return self._get_one_or_none(query)
-
+        return self._goto_absolute(func.min, filter_expression)
+    
     def get_last(self, filter_expression=None):
         ''' Get the last entity or None if no entity exits or is allowed by filter.'''
-        subquery = select([func.max(self.primary_key)])  # @UndefinedVariable
-        if not isinstance(filter_expression, type(None)):
+        return self._goto_absolute(func.max, filter_expression)
+    
+    def _goto_absolute(self, function, filter_expression):
+        subquery = select([function(self.primary_key)])  # @UndefinedVariable
+        table = self.primary_key.table
+        if filter_expression is not None:
             subquery = subquery.where(filter_expression)
-        query = select([self.primary_key.table])\
+            table = get_table_from_expression(filter_expression)
+        query = select([table])\
             .where(self.primary_key == subquery)  # @UndefinedVariable
         return self._get_one_or_none(query)
 
     def get_next(self, entity, filter_expression=None):
         ''' Get the next entity or the first, if it is the last'''
-        where_clause = self.primary_key > entity.id  # @UndefinedVariable
-        if not isinstance(filter_expression, type(None)):
-            where_clause = and_(filter_expression, where_clause)
-        subquery = select([func.min(self.primary_key)]).where(where_clause)  # @UndefinedVariable
-        query = select([self.primary_key.table])\
-            .where(self.primary_key == subquery)  # @UndefinedVariable
-        entity = self._get_one_or_none(query)
-        if not entity:
-            return self.get_first(filter_expression)
-        return entity
+        return self._goto_relative(self.primary_key > entity.id, func.min, filter_expression, self.get_first)
 
     def get_previous(self, entity, filter_expression=None):
         ''' Get the previous entity or the last, if it is the first'''
-        where_clause = self.primary_key < entity.id  # @UndefinedVariable
-        if not isinstance(filter_expression, type(None)):
-            where_clause = and_(filter_expression, where_clause)
-        subquery = select([func.max(self.primary_key)]).where(where_clause)  # @UndefinedVariable
-        query = select([self.primary_key.table])\
-            .where(self.primary_key == subquery)  # @UndefinedVariable
-        entity = self._get_one_or_none(query)
-        if not entity:
-            return self.get_last(filter_expression)
-        return entity
+        return self._goto_relative(self.primary_key < entity.id, func.max, filter_expression, self.get_last)
 
     def get_nearest(self, entity_id, filter_expression=None):
         ''' Get the entity matching the id, or, if not existing,
         the next entity after this id. If this does not provide
         an entity, get the last entity.'''
-        where_clause = self.primary_key >= entity_id
-        if not isinstance(filter_expression, type(None)):
-            where_clause = and_(filter_expression, where_clause)
-        subquery = select([func.min(self.primary_key)]).where(where_clause)
+        return self._goto_relative(self.primary_key >= entity_id, func.min, filter_expression, self.get_last)
+
+    def _goto_relative(self, condition, function, filter_expression, alternative):
+
+        table = self.table
+        if filter_expression is not None:
+            condition = and_(filter_expression, condition)
+            table = get_table_from_expression(filter_expression)
+        subquery = select([function(self.primary_key)]).where(condition)
         query = select([self.table])\
             .where(self.primary_key == subquery)  # @UndefinedVariable
         entity = self._get_one_or_none(query)
         if not entity:
-            return self.get_last(filter_expression)
+            return alternative(filter_expression)
         return entity
 
     def save(self, entity):
