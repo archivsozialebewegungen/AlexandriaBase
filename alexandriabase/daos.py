@@ -4,7 +4,8 @@ Created on 07.02.2018
 @author: michael
 '''
 from threading import Lock
-from sqlalchemy.sql.expression import or_, select, and_, delete, insert, update
+from sqlalchemy.sql.expression import or_, select, and_, delete, insert, update,\
+    join
 from sqlalchemy.sql.functions import func
 from _functools import reduce
 
@@ -102,6 +103,12 @@ EVENT_CROSS_REFERENCES_TABLE = Table(
     Column('id1', Integer, ForeignKey('chrono.ereignis_id', ondelete="CASCADE")),
     Column('id2', Integer, ForeignKey('chrono.ereignis_id', ondelete="CASCADE")))
 
+JOINS = {DOCUMENT_TABLE: 
+            {DOCUMENT_EVENT_REFERENCE_TABLE: join(DOCUMENT_TABLE,
+                                                  DOCUMENT_EVENT_REFERENCE_TABLE,
+                                                  isouter=True)}
+        }
+
 def get_foreign_keys(primary_key):
     '''
     Returns the foreign keys that reference a certain primary key.
@@ -114,15 +121,30 @@ def get_foreign_keys(primary_key):
                 foreign_keys.append(foreign_key.parent)
     return foreign_keys
 
-def get_table_from_expression(expression):
+def get_join_tables_from_expression(expression, default, join_tables):
+    
+    if expression is None:
+        return join_tables
     
     if hasattr(expression, '_from_objects') and expression._from_objects:
-        return expression._from_objects[0]
+        for table in expression._from_objects:
+            if table != default:
+                join_tables.add(table)
     
     if hasattr(expression, 'clauses') and expression.clauses:
-        return get_table_from_expression(expression.clauses[0])
+        for clause in expression.clauses:
+            join_tables = get_join_tables_from_expression(clause, default, join_tables)
     
-    raise Exception("Don't know how to extract table")
+    return join_tables
+
+def get_joins_for_expression(expression, from_table):
+    
+    joins = []
+    for join_table in get_join_tables_from_expression(expression, from_table, set()):
+        joins.append(JOINS[from_table][join_table])
+        
+    return joins
+
 def combine_expressions(expressions, method):
     '''
     Combines the different expressions with and.
@@ -294,6 +316,7 @@ class EntityDao(GenericDao):
                             "Use GenericDao for table {}." . format(table))
         key_key = primary_keys.keys()[0]
         self.primary_key = primary_keys[key_key]
+        self.select_column = self.primary_key
         self.foreign_keys = get_foreign_keys(self.primary_key)
     
     def _get_exactly_one(self, query):
@@ -362,39 +385,43 @@ class EntityDao(GenericDao):
         return self._goto_absolute(func.max, filter_expression)
     
     def _goto_absolute(self, function, filter_expression):
-        subquery = select([function(self.primary_key)])  # @UndefinedVariable
-        table = self.primary_key.table
+        subquery = select([function(self.select_column)])
+        for join in get_joins_for_expression(filter_expression, self.table):
+            subquery = subquery.select_from(join)    
         if filter_expression is not None:
             subquery = subquery.where(filter_expression)
-            table = get_table_from_expression(filter_expression)
-        query = select([table])\
+        query = select([self.table])\
             .where(self.primary_key == subquery)  # @UndefinedVariable
+            
         return self._get_one_or_none(query)
 
     def get_next(self, entity, filter_expression=None):
         ''' Get the next entity or the first, if it is the last'''
-        return self._goto_relative(self.primary_key > entity.id, func.min, filter_expression, self.get_first)
+        return self._goto_relative(self.select_column > entity.id, func.min, filter_expression, self.get_first)
 
     def get_previous(self, entity, filter_expression=None):
         ''' Get the previous entity or the last, if it is the first'''
-        return self._goto_relative(self.primary_key < entity.id, func.max, filter_expression, self.get_last)
+        return self._goto_relative(self.select_column < entity.id, func.max, filter_expression, self.get_last)
 
     def get_nearest(self, entity_id, filter_expression=None):
         ''' Get the entity matching the id, or, if not existing,
         the next entity after this id. If this does not provide
         an entity, get the last entity.'''
-        return self._goto_relative(self.primary_key >= entity_id, func.min, filter_expression, self.get_last)
+        return self._goto_relative(self.select_column >= entity_id, func.min, filter_expression, self.get_last)
 
     def _goto_relative(self, condition, function, filter_expression, alternative):
 
-        table = self.table
+        subquery = select([function(self.select_column)])
+        for join in get_joins_for_expression(filter_expression, self.table):
+            subquery = subquery.select_from(join)    
         if filter_expression is not None:
-            condition = and_(filter_expression, condition)
-            table = get_table_from_expression(filter_expression)
-        subquery = select([function(self.primary_key)]).where(condition)
+            condition = and_(condition, filter_expression)
+        subquery = subquery.where(condition)
+
         query = select([self.table])\
             .where(self.primary_key == subquery)  # @UndefinedVariable
         entity = self._get_one_or_none(query)
+        
         if not entity:
             return alternative(filter_expression)
         return entity
@@ -648,11 +675,8 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         if not document_filter.missing_event_link:
             return None
         
-        subquery = select([func.count(DOCUMENT_EVENT_REFERENCE_TABLE.c.laufnr)])\
-            .where(self.table.c.laufnr == DOCUMENT_EVENT_REFERENCE_TABLE.c.laufnr)\
-            .as_scalar()
-
-        return and_(subquery == 0, self.table.c.seite == 1)            
+        return and_(DOCUMENT_EVENT_REFERENCE_TABLE.c.ereignis_id.is_(None),
+                    DOCUMENT_TABLE.c.seite == 1)            
         
     def _build_signature_expression(self, document_filter):
         '''
@@ -698,52 +722,12 @@ class DocumentDao(EntityDao):
                  creator_provider: baseinjectorkeys.CREATOR_PROVIDER_KEY):
         # pylint: disable=too-many-arguments
         super().__init__(db_engine, DOCUMENT_TABLE)
+        self.select_column = DOCUMENT_TABLE.c.hauptnr
         self.config = config
         self.creator_dao = creator_dao
         self.document_type_dao = document_type_dao
         self.creator_provider = creator_provider
 
-    def get_first(self, filter_expression=None):
-        subquery = select([func.min(self.table.c.hauptnr)])
-        if not isinstance(filter_expression, type(None)):
-            subquery = subquery.where(filter_expression)
-        query = self._generate_query_from_subquery(subquery)
-        return self._get_one_or_none(query)
-
-    def get_last(self, filter_expression=None):
-        subquery = select([func.max(self.table.c.hauptnr)])
-        if not isinstance(filter_expression, type(None)):
-            subquery = subquery.where(filter_expression)
-        query = self._generate_query_from_subquery(subquery)
-        return self._get_one_or_none(query)
-
-    # pylint: disable=arguments-differ
-    def get_next(self, dokument, filter_expression=None):
-        where_clause = DOCUMENT_TABLE.c.hauptnr > dokument.id  # @UndefinedVariable
-        if not isinstance(filter_expression, type(None)):
-            where_clause = and_(filter_expression, where_clause)
-        function = func.min(self.table.c.hauptnr)
-        subquery = select([function]).where(where_clause)
-        query = self._generate_query_from_subquery(subquery)
-        document = self._get_one_or_none(query)
-        if document is None:
-            return self.get_first(filter_expression)
-        return document
-
-    def get_previous(self, dokument, filter_expression=None):
-        where_clause = self.table.c.hauptnr < dokument.id
-        if not isinstance(filter_expression, type(None)):
-            where_clause = and_(filter_expression, where_clause)
-        function = func.max(self.table.c.hauptnr)
-        subquery = select([function]).where(where_clause)
-        return self._get_one_or_last(subquery, filter_expression)
-        
-    def get_nearest(self, entity_id, filter_expression=None):
-        where_clause = self.table.c.hauptnr >= entity_id
-        if not isinstance(filter_expression, type(None)):
-            where_clause = and_(filter_expression, where_clause)
-        subquery = select([func.min(self.table.c.hauptnr)]).where(where_clause)
-        return self._get_one_or_last(subquery, filter_expression)
         
     def _generate_query_from_subquery(self, subquery):
         where_clause = self.primary_key == subquery

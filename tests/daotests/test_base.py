@@ -5,7 +5,7 @@ Created on 11.10.2015
 '''
 from injector import Injector
 from sqlalchemy.exc import OperationalError
-from sqlalchemy.sql.expression import text
+from sqlalchemy.sql.expression import text, or_
 import unittest
 
 from alexandriabase import AlexBaseModule, baseinjectorkeys
@@ -13,13 +13,36 @@ from alex_test_utils import setup_database_schema, load_table_data, clear_table_
     TestEnvironment, MODE_SIMPLE
 from alexandriabase.base_exceptions import NoSuchEntityException, DataError
 from alexandriabase.daos import DaoModule, EntityDao,\
-    EVENT_CROSS_REFERENCES_TABLE, EVENT_TABLE, CreatorDao
+    EVENT_CROSS_REFERENCES_TABLE, EVENT_TABLE, CreatorDao, DOCUMENT_TABLE,\
+    DOCUMENT_EVENT_REFERENCE_TABLE, get_join_tables_from_expression,\
+    get_joins_for_expression
 from alexandriabase.domain import Entity
 
 
 tables = ("erfasser", "ereignistyp", "doktyp", "chrono", "dokument", "dverweis",  
           "everweis", "qverweis", "registry")
 
+
+class TestFetchingJoinTables(unittest.TestCase):
+    
+    
+    def test_find_join_tables(self):
+        expression = or_(DOCUMENT_TABLE.c.laufnr == 3,  # @UndefinedVariable
+                         DOCUMENT_EVENT_REFERENCE_TABLE.c.laufnr == 4)  # @UndefinedVariable
+    
+        join_tables = get_join_tables_from_expression(expression, DOCUMENT_TABLE, set())
+    
+        self.assertEqual(1, len(join_tables))
+        self.assertEqual(DOCUMENT_EVENT_REFERENCE_TABLE, join_tables.pop())
+
+    def test_find_joins(self):
+
+        expression = or_(DOCUMENT_TABLE.c.laufnr == 3,  # @UndefinedVariable
+                         DOCUMENT_EVENT_REFERENCE_TABLE.c.laufnr == 4)  # @UndefinedVariable
+    
+        joins = get_joins_for_expression(expression, DOCUMENT_TABLE)
+    
+        self.assertEqual(1, len(joins))
 
 class TestUnimplementedMethods(unittest.TestCase):
     

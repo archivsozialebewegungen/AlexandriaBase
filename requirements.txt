@@ -1,5 +1,5 @@
-injector==0.13
-SQLAlchemy~=1.1
+injector~=0.13
+SQLAlchemy~=1.2
 reportlab~=3.4
 psycopg2~=2.7
 pyPDF2~=1.26
@@ -7,5 +7,3 @@ Pillow~=4.3
 ddt~=1.1
 pytest~=3.2
 coverage~=3.4
-
-
