@@ -201,6 +201,14 @@ class TestDocumentDao(DatabaseBaseTest):
             self.assertEqual(document.id, doc_id)
             document = self.dao.get_next(document, filter_expression)
         
+    def test_filtering_7(self):
+        document_filter = DocumentFilter()
+        document_filter.searchterms = ["äöüß"]
+        document_filter.case_sensitive = False
+        filter_expression = self.document_filter_handler.create_filter_expression(document_filter)
+        document = self.dao.get_first(filter_expression)
+        self.assertEqual(document.id, 13)
+
     def testSignatureFiltering(self):
         document_filter = DocumentFilter()
         document_filter.signature = "1.1"

@@ -220,8 +220,11 @@ class GenericFilterExpressionBuilder:
                     searchterm_expressions.append(
                         self.textcolumn.contains(searchterm))
                 else:
+                    # We can't use pythons upper() function here because the
+                    # database might have another implementation than python
+                    # postgres: ß -> ß, Python: ß -> SS
                     searchterm_expressions.append(
-                        func.upper(self.textcolumn).contains(searchterm.upper()))
+                        func.upper(self.textcolumn).contains(func.upper(searchterm)))
         return searchterm_expressions
 
 
