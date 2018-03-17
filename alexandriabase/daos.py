@@ -375,7 +375,7 @@ class EntityDao(GenericDao):
 
     def get_by_id(self, entity_id):
         ''' Get an entity by id. Throws exception when the entity does not exist.'''
-        query = select([self.primary_key.table])\
+        query = select([self.table])\
             .where(self.primary_key == entity_id)
         return self._get_exactly_one(query)
 

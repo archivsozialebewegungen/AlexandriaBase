@@ -1,0 +1,1 @@
+INSERT INTO entity2document (documentid, entityid, confirmed) VALUES (1, 2, 0)

@@ -161,11 +161,9 @@ def clear_table(name, engine):
     connection.close()
 
 def setup_database_schema(engine):
-    #load_fixture("schema", engine)
     ALEXANDRIA_METADATA.create_all(engine)
 
 def drop_database_schema(engine):
-    #load_fixture("schema", engine)
     ALEXANDRIA_METADATA.drop_all(engine)
 
 def load_table_data(tables, engine):
