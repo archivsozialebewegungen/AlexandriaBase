@@ -232,6 +232,10 @@ class TestEreignisDao(DatabaseBaseTest):
         number_of_references = len(referenced_ids)
         self.assertEqual(number_of_references, 0)
         
+    def test_get_statistics(self):
+        statistics = self.dao.get_statistics()
+        self.assertEqual(statistics.number_of_events, 4)
+
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

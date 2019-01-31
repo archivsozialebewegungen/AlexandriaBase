@@ -670,6 +670,14 @@ class DocumentStatistics:
         self.number_of_files = 0
         self.number_of_files_by_type = {}
         
+class EventStatistics:
+    '''
+    Wrapper class for statistical information on documents
+    '''
+    
+    def __init__(self):
+        self.number_of_events = 0
+
 class PaginatedResult:
     '''
     Utility class for paginated results

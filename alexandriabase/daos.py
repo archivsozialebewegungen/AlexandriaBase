@@ -15,7 +15,7 @@ from injector import inject, singleton, provider, ClassProvider, Module
 from alexandriabase import baseinjectorkeys
 from alexandriabase.domain import Creator, DocumentStatistics, Document,\
     DocumentFileInfo, DocumentType, AlexDateRange, Event, alex_date_from_key,\
-    EventType, EventTypeIdentifier, Tree
+    EventType, EventTypeIdentifier, Tree, EventStatistics
 from sqlalchemy.sql.schema import Column, Table, ForeignKey, MetaData
 from sqlalchemy.sql.sqltypes import Integer, String, Date
 from sqlalchemy.engine import create_engine
@@ -1238,6 +1238,16 @@ class EventDao(EntityDao):
         for row in result:
             events.append(self._row_to_entity(row))
         return events
+    
+    def get_statistics(self):
+        '''
+        Returns statistical information on the documents in the database
+        '''
+        
+        statistics = EventStatistics()
+        statistics.number_of_events = self.get_count()
+        return statistics
+
 
 class EventTypeDao(GenericDao):
     '''
