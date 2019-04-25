@@ -709,7 +709,7 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
             return None
         subquery = select([self.table.c.hauptnr]).where(
             self.table.c.doktyp == document_filter.document_type)
-        return self.table.c.hauptnr.in_(subquery)
+        return self.table.c.laufnr.in_(subquery)
 
 class DocumentDao(EntityDao):
     '''
