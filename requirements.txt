@@ -1,10 +1,10 @@
-injector~=0.13
+injector~=0.18
 SQLAlchemy~=1.2
 reportlab~=3.4
 psycopg2~=2.7
 pyPDF2~=1.26
-Pillow~=4.3
+Pillow~=5.4
 ddt~=1.1
 pytest~=3.2
-coverage~=3.4
+coverage~=4.5
 typing~=3.6

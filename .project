@@ -3,6 +3,8 @@
 	<name>AlexandriaBase</name>
 	<comment></comment>
 	<projects>
+		<project>AlexandriaGui</project>
+		<project>AlexandriaPlugins</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

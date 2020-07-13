@@ -2,7 +2,7 @@
 All the keys of the alexandria base module for
 dependency injection
 '''
-from injector import Key
+from injector import BoundKey as Key
 
 
 # pylint: disable=invalid-name
