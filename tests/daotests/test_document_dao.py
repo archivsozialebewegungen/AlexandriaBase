@@ -10,14 +10,15 @@ from alexandriabase.domain import Document, DocumentFilter
 from daotests.test_base import DatabaseBaseTest
 from sqlalchemy.sql.expression import or_
 from alexandriabase import baseinjectorkeys
-from alexandriabase.daos import DocumentFilterExpressionBuilder, DOCUMENT_TABLE
+from alexandriabase.daos import DocumentFilterExpressionBuilder, DOCUMENT_TABLE,\
+    DocumentDao, CreatorDao, DocumentTypeDao
 
 
 class TestDocumentDao(DatabaseBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.dao = self.injector.get(baseinjectorkeys.DOCUMENT_DAO_KEY)
+        self.dao = self.injector.get(DocumentDao)
         self.document_filter_handler = DocumentFilterExpressionBuilder()
 
     def tearDown(self):
@@ -259,7 +260,7 @@ class TestDocumentDao(DatabaseBaseTest):
         document.condition = "New state"
         document.keywords = "New keywords"
         document.standort = "1.2.3.IV"
-        document.document_type = self.injector.get(baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY).get_by_id(17)
+        document.document_type = self.injector.get(DocumentTypeDao).get_by_id(17)
 
         self.dao.save(document)
 
@@ -282,8 +283,8 @@ class TestDocumentDao(DatabaseBaseTest):
         document.description = "My description"
         document.keywords = "My keywords"
         document.condition = "My document state"
-        document.erfasser = self.injector.get(baseinjectorkeys.CREATOR_DAO_KEY).get_by_id(2)
-        document.document_type = self.injector.get(baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY).get_by_id(5)
+        document.erfasser = self.injector.get(CreatorDao).get_by_id(2)
+        document.document_type = self.injector.get(DocumentTypeDao).get_by_id(5)
         self.dao.save(document)
 
         document = self.dao.get_last()

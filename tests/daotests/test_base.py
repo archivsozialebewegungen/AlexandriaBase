@@ -8,7 +8,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.expression import text, or_
 import unittest
 
-from alexandriabase import AlexBaseModule, baseinjectorkeys
+from alexandriabase import baseinjectorkeys
 from alex_test_utils import setup_database_schema, load_table_data, clear_table_data, \
     TestEnvironment, MODE_SIMPLE
 from alexandriabase.base_exceptions import NoSuchEntityException, DataError
@@ -17,6 +17,7 @@ from alexandriabase.daos import DaoModule, EntityDao,\
     DOCUMENT_EVENT_REFERENCE_TABLE, get_join_tables_from_expression,\
     get_joins_for_expression
 from alexandriabase.domain import Entity
+from sqlalchemy.engine.base import Engine
 
 
 tables = ("erfasser", "ereignistyp", "doktyp", "chrono", "dokument", "dverweis",  
@@ -97,19 +98,18 @@ class TestDaoModuleConfiguration(unittest.TestCase):
     def test_configuration(self):
         
         injector = Injector([
-                        AlexBaseModule(),
                         DaoModule()
                          ])
 
         # Try to get the database engine, which is the crucial part
-        injector.get(baseinjectorkeys.DB_ENGINE_KEY)    
+        injector.get(Engine)    
         
 class DatabaseBaseTest(unittest.TestCase):
 
     def setUp(self):
         self.test_environment = TestEnvironment()
-        self.injector = Injector([AlexBaseModule(), DaoModule()])
-        self.engine = self.injector.get(baseinjectorkeys.DB_ENGINE_KEY)
+        self.injector = Injector([DaoModule()])
+        self.engine = self.injector.get(Engine)
         setup_database_schema(self.engine)
         load_table_data(tables, self.engine)
 

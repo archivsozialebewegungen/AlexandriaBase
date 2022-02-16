@@ -20,6 +20,9 @@ from sqlalchemy.sql.schema import Column, Table, ForeignKey, MetaData
 from sqlalchemy.sql.sqltypes import Integer, String, Date
 from sqlalchemy.engine import create_engine
 from sqlalchemy.pool import StaticPool
+from sqlalchemy.engine.base import Engine
+from alexandriabase.config import Config
+from alexandriabase.baseinjectorkeys import CREATOR_PROVIDER_KEY
 
 CURRENT_VERSION = '0.4'
 
@@ -394,7 +397,7 @@ class EntityDao(GenericDao):
         if filter_expression is not None:
             subquery = subquery.where(filter_expression)
         query = select([self.table])\
-            .where(self.primary_key == subquery)  # @UndefinedVariable
+            .where(self.primary_key == subquery.scalar_subquery())  # @UndefinedVariable
             
         return self._get_one_or_none(query)
 
@@ -422,7 +425,7 @@ class EntityDao(GenericDao):
         subquery = subquery.where(condition)
 
         query = select([self.table])\
-            .where(self.primary_key == subquery)  # @UndefinedVariable
+            .where(self.primary_key == subquery.scalar_subquery())  # @UndefinedVariable
         entity = self._get_one_or_none(query)
         
         if not entity:
@@ -562,37 +565,14 @@ class CachingDao(EntityDao):
             self.cache[entity.id] = entity
         return entity_list
 
-class BasicCreatorProvider(object):
-    '''
-    This basic implementation of a creator provider
-    always return the admin as creator. This is a
-    creator provider for automated scripts etc. Interactive
-    applications should provide their own implementations
-    that return the current user.
-    '''
-    @inject
-    def __init__(self, creator_dao: baseinjectorkeys.CREATOR_DAO_KEY):
-        self.creator_dao = creator_dao
-
-    def _get_creator(self):
-        ''' Private getter to use in property.'''
-        creator = self.creator_dao.find_by_name("Admin")
-        if creator is None:
-            creator = Creator()
-            creator.name = "Admin"
-            creator.visible = False
-            creator = self.creator_dao.save(creator)
-        return creator
-
-    creator = property(_get_creator)
-
+@singleton
 class CreatorDao(CachingDao):
     '''
     Reads users from the database
     '''
 
     @inject
-    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
+    def __init__(self, db_engine: Engine):
         super().__init__(db_engine, CREATOR_TABLE)
         self.cache = {}
 
@@ -655,6 +635,31 @@ class CreatorDao(CachingDao):
         erfasser.visible = row[self.table.c.anzeige] == 'y'
         return erfasser
 
+class BasicCreatorProvider(object):
+    '''
+    This basic implementation of a creator provider
+    always return the admin as creator. This is a
+    creator provider for automated scripts etc. Interactive
+    applications should provide their own implementations
+    that return the current user.
+    '''
+    @inject
+    def __init__(self, creator_dao: CreatorDao):
+        self.creator_dao = creator_dao
+
+    def _get_creator(self):
+        ''' Private getter to use in property.'''
+        creator = self.creator_dao.find_by_name("Admin")
+        if creator is None:
+            creator = Creator()
+            creator.name = "Admin"
+            creator.visible = False
+            creator = self.creator_dao.save(creator)
+        return creator
+
+    creator = property(_get_creator)
+
+
 class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
     '''
     Creates a document filter expression for sql alchemy from a
@@ -711,6 +716,30 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
             self.table.c.doktyp == document_filter.document_type)
         return self.table.c.laufnr.in_(subquery)
 
+@singleton
+class DocumentTypeDao(CachingDao):
+    '''
+    Dao for document types.
+    '''
+
+    @inject
+    def __init__(self, db_engine: Engine):
+        super().__init__(db_engine, DOCUMENT_TYPE_TABLE)
+
+    def _row_to_entity(self, row):
+        entity = DocumentType(row[self.table.c.id])
+        entity.description = row[self.table.c.beschreibung]
+        return entity 
+
+    def get_all(self):
+        '''
+        Returns all document types from the cache. If the cache
+        is empty loads the cache.
+        '''
+        return self.find()
+
+
+@singleton
 class DocumentDao(EntityDao):
     '''
     Persistance for the Document domain entity.
@@ -718,10 +747,10 @@ class DocumentDao(EntityDao):
 
     @inject
     def __init__(self,
-                 db_engine: baseinjectorkeys.DB_ENGINE_KEY,
-                 config: baseinjectorkeys.CONFIG_KEY,
-                 creator_dao: baseinjectorkeys.CREATOR_DAO_KEY,
-                 document_type_dao: baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY,
+                 db_engine: Engine,
+                 config: Config,
+                 creator_dao: CreatorDao,
+                 document_type_dao: DocumentTypeDao,
                  creator_provider: baseinjectorkeys.CREATOR_PROVIDER_KEY):
         # pylint: disable=too-many-arguments
         super().__init__(db_engine, DOCUMENT_TABLE)
@@ -821,6 +850,7 @@ class DocumentDao(EntityDao):
         
         return super().find(extended_expression, page, page_size) 
 
+@singleton
 class DocumentFileInfoDao(EntityDao):
     '''
     Dao for the document files. At the moment
@@ -831,8 +861,8 @@ class DocumentFileInfoDao(EntityDao):
 
     @inject
     def __init__(self,
-                 db_engine: baseinjectorkeys.DB_ENGINE_KEY,
-                 creator_provider: baseinjectorkeys.CREATOR_PROVIDER_KEY):
+                 db_engine: Engine,
+                 creator_provider: CREATOR_PROVIDER_KEY):
         super().__init__(db_engine, DOCUMENT_TABLE)
         self.creator_provider = creator_provider
         self.table = DOCUMENT_TABLE
@@ -958,34 +988,14 @@ class DocumentFileInfoDao(EntityDao):
         info.page = row[self.table.c.seite]  
         return info
 
-class DocumentTypeDao(CachingDao):
-    '''
-    Dao for document types.
-    '''
-
-    @inject
-    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
-        super().__init__(db_engine, DOCUMENT_TYPE_TABLE)
-
-    def _row_to_entity(self, row):
-        entity = DocumentType(row[self.table.c.id])
-        entity.description = row[self.table.c.beschreibung]
-        return entity 
-
-    def get_all(self):
-        '''
-        Returns all document types from the cache. If the cache
-        is empty loads the cache.
-        '''
-        return self.find()
-
+@singleton
 class EventCrossreferencesDao(GenericDao):
     '''
     Handles the crossreferences between events.
     '''
     
     @inject
-    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
+    def __init__(self, db_engine: Engine):
         super().__init__(db_engine)
         self.table = EVENT_CROSS_REFERENCES_TABLE
 
@@ -1091,6 +1101,238 @@ class EventFilterExpressionBuilder(GenericFilterExpressionBuilder):
             return None
         return self.table.c.status_id == 0
 
+@singleton
+class EventTypeDao(GenericDao):
+    '''
+    Dao for event types.
+    '''
+
+    @inject
+    def __init__(self, db_engine: Engine):
+        super().__init__(db_engine)
+        self.table = EVENTTYPE_TABLE
+        self.ref_table = EVENT_EVENTTYPE_REFERENCE_TABLE
+        
+    def get_by_id(self, event_type_id):
+        '''
+        Gets the event type from the cache. Loads the cache, if it
+        was not filled.
+        '''
+        query = select([self.table]).where(
+            and_(self.table.c.haupt == event_type_id.hauptid,
+                 self.table.c.unter == event_type_id.unterid))
+        row = self._get_exactly_one_row(query)
+        return self._row_to_entity(row)
+        
+    def find_all(self):
+        '''
+        Fetches all event types.
+        '''
+        query = select([self.table])
+        result = self._get_connection().execute(query)
+        types = []
+        for row in result.fetchall():
+            types.append(self._row_to_entity(row))
+        result.close()
+        return types
+    
+    def get_event_type_tree(self):
+        '''
+        Fetches all event types and returns them as tree.
+        '''
+        entities = self.find_all()
+        entities.append(EventType(EventTypeIdentifier(0, 0), _("Event types")))
+        return Tree(entities)
+            
+    def get_event_types_for_event_id(self, ereignis_id):
+        '''
+        Fetches the event types for a certain event
+        '''
+        query = select([self.ref_table]).\
+            where(
+                self.ref_table.c.ereignis_id == ereignis_id
+            ).order_by(
+                self.ref_table.c.hauptid,
+                self.ref_table.c.unterid
+            )
+        result = self._get_connection().execute(query)
+        typelist = []
+        for row in result.fetchall():
+            typelist.append(
+                self.get_by_id(
+                    EventTypeIdentifier(
+                        row[self.ref_table.c.hauptid],
+                        row[self.ref_table.c.unterid])
+                )
+            )
+        result.close()
+        return typelist
+
+    def join_event_type_to_event_id(self, event_id, event_type):
+        '''
+        Adds an event type to the given event.
+        '''
+        already_joined = self.get_event_types_for_event_id(event_id)
+        if event_type in already_joined:
+            return
+        query = insert(self.ref_table).values(ereignis_id=event_id,
+                                              hauptid=event_type.id.hauptid,
+                                              unterid=event_type.id.unterid)
+        self.connection.execute(query)
+        
+    def unlink_event_type_from_event_id(self, event_id, event_type):
+        '''
+        Removes an event type from the given event
+        '''
+        query = delete(self.ref_table).where(
+            and_(self.ref_table.c.ereignis_id == event_id,
+                 self.ref_table.c.hauptid == event_type.id.hauptid,
+                 self.ref_table.c.unterid == event_type.id.unterid))
+        self.connection.execute(query)
+
+    def _row_to_entity(self, row):
+        event_type_id = EventTypeIdentifier(row[self.table.c.haupt], row[self.table.c.unter])
+        return EventType(event_type_id, row[self.table.c.beschreibung])
+
+@singleton
+class DocumentEventRelationsDao(GenericDao):
+    '''
+    Handles all kinds of relations
+    '''
+    
+    @inject
+    def __init__(self, 
+                 db_engine: Engine,
+                 document_filter_expression_builder:
+                 baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY,
+                 event_filter_expression_builder:
+                 baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY):
+        super().__init__(db_engine)
+        self.deref_table = DOCUMENT_EVENT_REFERENCE_TABLE
+        self.doc_table = DOCUMENT_TABLE
+        self.event_table = EVENT_TABLE
+        self.doc_filter_expression_builder = document_filter_expression_builder
+        self.event_filter_expression_builder = event_filter_expression_builder
+        
+    # TODO: clean up the references and use pages instead of file ids
+    def fetch_doc_file_ids_for_event_id(self, event_id):
+        '''
+        Theoretically it is possible to reference an event to
+        a single document file of a document. So you won't get
+        the document id, but the document file id when querying.
+        This method should probably not be used in any context.
+        '''
+        query = select([self.deref_table.c.laufnr]).where(
+            self.deref_table.c.ereignis_id == event_id)  
+        result = self._get_connection().execute(query)
+        file_ids = []
+        for row in result.fetchall():
+            file_ids.append(row[self.deref_table.c.laufnr])  
+        result.close()
+        return file_ids
+    
+    def fetch_document_ids_for_event_id(self, ereignis_id):
+        '''
+        Fetches the document ids for an event id. Since the join table
+        does not link document ids but document file ids the query is
+        complicated.
+        '''
+        subquery = select([self.deref_table.c.laufnr]).where(
+            self.deref_table.c.ereignis_id == ereignis_id)  
+        query = select([self.doc_table.c.hauptnr]).where(
+            self.doc_table.c.laufnr.in_(subquery)).distinct().order_by(
+                self.doc_table.c.hauptnr)  
+        result = self._get_connection().execute(query)
+        dokument_ids = []
+        for row in result.fetchall():
+            dokument_ids.append(row[self.doc_table.c.hauptnr])  
+        result.close()
+        return dokument_ids
+    
+    def join_document_id_with_event_id(self, document_id, event_id):
+        '''
+        Adds the document and event ids into the join table
+        '''
+        if document_id in self.fetch_document_ids_for_event_id(event_id):
+            # already joined
+            return 
+        insert_statement = insert(self.deref_table).\
+            values(ereignis_id=event_id,
+                   laufnr=document_id)
+        self._get_connection().execute(insert_statement)
+        
+    # TODO: This method does not work correctly, when a document file
+    #       is linked that is not the first document file for the document.
+    def delete_document_event_relation(self, document_id, event_id):
+        '''
+        Unlinks a document from an event.
+        '''
+        delete_statement = delete(self.deref_table).where(
+            and_(self.deref_table.c.ereignis_id == event_id,  
+                 self.deref_table.c.laufnr == document_id))  
+        self._get_connection().execute(delete_statement)
+    
+    def fetch_doc_event_references(self, document_event_reference_filter):
+        '''
+        Fetches a dictionary with document ids as keys and and arrays of
+        event ids as values for certain filter criteria. The event array
+        may be empty if there are no event criteria in the given filter.
+        
+        The filter is a combination of a document and an event filter. The
+        document and the event criteria are joined with `and`.
+        '''
+        
+        join = self.doc_table.outerjoin(
+            self.deref_table,
+            self.deref_table.c.laufnr == self.doc_table.c.hauptnr).outerjoin(
+                self.event_table,
+                self.event_table.c.ereignis_id == self.deref_table.c.ereignis_id)        
+        query = select([self.doc_table.c.hauptnr, self.deref_table.c.ereignis_id]).\
+            distinct().select_from(join)
+        where_clauses = []
+        
+        event_where = self.event_filter_expression_builder.\
+            create_filter_expression(document_event_reference_filter)
+        if event_where is not None:
+            where_clauses.append(event_where)
+        document_where = self.doc_filter_expression_builder.\
+            create_filter_expression(document_event_reference_filter)
+        if document_where is not None:
+            where_clauses.append(document_where)
+        
+        if where_clauses:
+            query = query.where(combine_expressions(where_clauses, and_))
+
+        references = {}
+        for row in self._get_connection().execute(query):
+            document_id = row[self.doc_table.c.hauptnr]
+            event_id = row[self.deref_table.c.ereignis_id]
+            if not document_id in references:
+                references[document_id] = []
+            if event_id is not None:
+                references[document_id].append(event_id)
+            
+        return references
+
+    def fetch_ereignis_ids_for_dokument_id(self, dokument_id):
+        '''
+        Does what the method name says.
+        '''
+        subquery = select([self.doc_table.c.laufnr]).\
+            where(self.doc_table.c.hauptnr == dokument_id)  
+        query = select([self.deref_table.c.ereignis_id]).\
+            where(self.deref_table.c.laufnr.in_(subquery)).\
+            distinct().\
+            order_by(self.deref_table.c.ereignis_id)  
+        result = self._get_connection().execute(query)
+        ereignis_ids = []
+        for row in result.fetchall():
+            ereignis_ids.append(row[self.deref_table.c.ereignis_id])  
+        result.close()
+        return ereignis_ids
+
+
+@singleton
 class EventDao(EntityDao):
     '''
     Persistance dao for events.
@@ -1098,10 +1340,10 @@ class EventDao(EntityDao):
 
     @inject
     def __init__(self,
-                 db_engine: baseinjectorkeys.DB_ENGINE_KEY,
-                 creator_dao: baseinjectorkeys.CREATOR_DAO_KEY,
-                 references_dao: baseinjectorkeys.RELATIONS_DAO_KEY,
-                 eventtype_dao: baseinjectorkeys.EVENT_TYPE_DAO_KEY,
+                 db_engine: Engine,
+                 creator_dao: CreatorDao,
+                 references_dao: DocumentEventRelationsDao,
+                 eventtype_dao: EventTypeDao,
                  creator_provider: baseinjectorkeys.CREATOR_PROVIDER_KEY):
         '''
         Constructor with a lot of dependency injection.
@@ -1249,105 +1491,14 @@ class EventDao(EntityDao):
         return statistics
 
 
-class EventTypeDao(GenericDao):
-    '''
-    Dao for event types.
-    '''
-
-    @inject
-    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
-        super().__init__(db_engine)
-        self.table = EVENTTYPE_TABLE
-        self.ref_table = EVENT_EVENTTYPE_REFERENCE_TABLE
-        
-    def get_by_id(self, event_type_id):
-        '''
-        Gets the event type from the cache. Loads the cache, if it
-        was not filled.
-        '''
-        query = select([self.table]).where(
-            and_(self.table.c.haupt == event_type_id.hauptid,
-                 self.table.c.unter == event_type_id.unterid))
-        row = self._get_exactly_one_row(query)
-        return self._row_to_entity(row)
-        
-    def find_all(self):
-        '''
-        Fetches all event types.
-        '''
-        query = select([self.table])
-        result = self._get_connection().execute(query)
-        types = []
-        for row in result.fetchall():
-            types.append(self._row_to_entity(row))
-        result.close()
-        return types
-    
-    def get_event_type_tree(self):
-        '''
-        Fetches all event types and returns them as tree.
-        '''
-        entities = self.find_all()
-        entities.append(EventType(EventTypeIdentifier(0, 0), _("Event types")))
-        return Tree(entities)
-            
-    def get_event_types_for_event_id(self, ereignis_id):
-        '''
-        Fetches the event types for a certain event
-        '''
-        query = select([self.ref_table]).\
-            where(
-                self.ref_table.c.ereignis_id == ereignis_id
-            ).order_by(
-                self.ref_table.c.hauptid,
-                self.ref_table.c.unterid
-            )
-        result = self._get_connection().execute(query)
-        typelist = []
-        for row in result.fetchall():
-            typelist.append(
-                self.get_by_id(
-                    EventTypeIdentifier(
-                        row[self.ref_table.c.hauptid],
-                        row[self.ref_table.c.unterid])
-                )
-            )
-        result.close()
-        return typelist
-
-    def join_event_type_to_event_id(self, event_id, event_type):
-        '''
-        Adds an event type to the given event.
-        '''
-        already_joined = self.get_event_types_for_event_id(event_id)
-        if event_type in already_joined:
-            return
-        query = insert(self.ref_table).values(ereignis_id=event_id,
-                                              hauptid=event_type.id.hauptid,
-                                              unterid=event_type.id.unterid)
-        self.connection.execute(query)
-        
-    def unlink_event_type_from_event_id(self, event_id, event_type):
-        '''
-        Removes an event type from the given event
-        '''
-        query = delete(self.ref_table).where(
-            and_(self.ref_table.c.ereignis_id == event_id,
-                 self.ref_table.c.hauptid == event_type.id.hauptid,
-                 self.ref_table.c.unterid == event_type.id.unterid))
-        self.connection.execute(query)
-
-    def _row_to_entity(self, row):
-        event_type_id = EventTypeIdentifier(row[self.table.c.haupt], row[self.table.c.unter])
-        return EventType(event_type_id, row[self.table.c.beschreibung])
-    
+@singleton    
 class RegistryDao(GenericDao):
     '''
     Reads and writes keys / value pairs from the database
     '''
 
     @inject
-    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
+    def __init__(self, db_engine: Engine):
         super().__init__(db_engine)
         self.table = REGISTRY_TABLE
 
@@ -1386,143 +1537,6 @@ class RegistryDao(GenericDao):
             wert=value)
         self.connection.execute(query)
 
-class DocumentEventRelationsDao(GenericDao):
-    '''
-    Handles all kinds of relations
-    '''
-    
-    @inject
-    def __init__(self, 
-                 db_engine:
-                 baseinjectorkeys.DB_ENGINE_KEY,
-                 document_filter_expression_builder:
-                 baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY,
-                 event_filter_expression_builder:
-                 baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY):
-        super().__init__(db_engine)
-        self.deref_table = DOCUMENT_EVENT_REFERENCE_TABLE
-        self.doc_table = DOCUMENT_TABLE
-        self.event_table = EVENT_TABLE
-        self.doc_filter_expression_builder = document_filter_expression_builder
-        self.event_filter_expression_builder = event_filter_expression_builder
-        
-    # TODO: clean up the references and use pages instead of file ids
-    def fetch_doc_file_ids_for_event_id(self, event_id):
-        '''
-        Theoretically it is possible to reference an event to
-        a single document file of a document. So you won't get
-        the document id, but the document file id when querying.
-        This method should probably not be used in any context.
-        '''
-        query = select([self.deref_table.c.laufnr]).where(
-            self.deref_table.c.ereignis_id == event_id)  
-        result = self._get_connection().execute(query)
-        file_ids = []
-        for row in result.fetchall():
-            file_ids.append(row[self.deref_table.c.laufnr])  
-        result.close()
-        return file_ids
-    
-    def fetch_document_ids_for_event_id(self, ereignis_id):
-        '''
-        Fetches the document ids for an event id. Since the join table
-        does not link document ids but document file ids the query is
-        complicated.
-        '''
-        subquery = select([self.deref_table.c.laufnr]).where(
-            self.deref_table.c.ereignis_id == ereignis_id)  
-        query = select([self.doc_table.c.hauptnr]).where(
-            self.doc_table.c.laufnr.in_(subquery)).distinct().order_by(
-                self.doc_table.c.hauptnr)  
-        result = self._get_connection().execute(query)
-        dokument_ids = []
-        for row in result.fetchall():
-            dokument_ids.append(row[self.doc_table.c.hauptnr])  
-        result.close()
-        return dokument_ids
-    
-    def join_document_id_with_event_id(self, document_id, event_id):
-        '''
-        Adds the document and event ids into the join table
-        '''
-        if document_id in self.fetch_document_ids_for_event_id(event_id):
-            # already joined
-            return 
-        insert_statement = insert(self.deref_table).\
-            values(ereignis_id=event_id,
-                   laufnr=document_id)
-        self._get_connection().execute(insert_statement)
-        
-    # TODO: This method does not work correctly, when a document file
-    #       is linked that is not the first document file for the document.
-    def delete_document_event_relation(self, document_id, event_id):
-        '''
-        Unlinks a document from an event.
-        '''
-        delete_statement = delete(self.deref_table).where(
-            and_(self.deref_table.c.ereignis_id == event_id,  
-                 self.deref_table.c.laufnr == document_id))  
-        self._get_connection().execute(delete_statement)
-    
-    def fetch_doc_event_references(self, document_event_reference_filter):
-        '''
-        Fetches a dictionary with document ids as keys and and arrays of
-        event ids as values for certain filter criteria. The event array
-        may be empty if there are no event criteria in the given filter.
-        
-        The filter is a combination of a document and an event filter. The
-        document and the event criteria are joined with `and`.
-        '''
-        
-        join = self.doc_table.outerjoin(
-            self.deref_table,
-            self.deref_table.c.laufnr == self.doc_table.c.hauptnr).outerjoin(
-                self.event_table,
-                self.event_table.c.ereignis_id == self.deref_table.c.ereignis_id)        
-        query = select([self.doc_table.c.hauptnr, self.deref_table.c.ereignis_id]).\
-            distinct().select_from(join)
-        where_clauses = []
-        
-        event_where = self.event_filter_expression_builder.\
-            create_filter_expression(document_event_reference_filter)
-        if event_where is not None:
-            where_clauses.append(event_where)
-        document_where = self.doc_filter_expression_builder.\
-            create_filter_expression(document_event_reference_filter)
-        if document_where is not None:
-            where_clauses.append(document_where)
-        
-        if where_clauses:
-            query = query.where(combine_expressions(where_clauses, and_))
-
-        references = {}
-        for row in self._get_connection().execute(query):
-            document_id = row[self.doc_table.c.hauptnr]
-            event_id = row[self.deref_table.c.ereignis_id]
-            if not document_id in references:
-                references[document_id] = []
-            if event_id is not None:
-                references[document_id].append(event_id)
-            
-        return references
-
-    def fetch_ereignis_ids_for_dokument_id(self, dokument_id):
-        '''
-        Does what the method name says.
-        '''
-        subquery = select([self.doc_table.c.laufnr]).\
-            where(self.doc_table.c.hauptnr == dokument_id)  
-        query = select([self.deref_table.c.ereignis_id]).\
-            where(self.deref_table.c.laufnr.in_(subquery)).\
-            distinct().\
-            order_by(self.deref_table.c.ereignis_id)  
-        result = self._get_connection().execute(query)
-        ereignis_ids = []
-        for row in result.fetchall():
-            ereignis_ids.append(row[self.deref_table.c.ereignis_id])  
-        result.close()
-        return ereignis_ids
-
 class DaoModule(Module):
     '''
     Injector module to bind the dao keys
@@ -1530,35 +1544,17 @@ class DaoModule(Module):
     def configure(self, binder):
         binder.bind(baseinjectorkeys.CREATOR_PROVIDER_KEY,
                     ClassProvider(BasicCreatorProvider), scope=singleton)
-        binder.bind(baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY,
-                    ClassProvider(EventFilterExpressionBuilder), scope=singleton)
         binder.bind(baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY,
-                    ClassProvider(DocumentFilterExpressionBuilder), scope=singleton)
-        binder.bind(baseinjectorkeys.CREATOR_DAO_KEY,
-                    ClassProvider(CreatorDao), scope=singleton)
-        binder.bind(baseinjectorkeys.REGISTRY_DAO_KEY,
-                    ClassProvider(RegistryDao), scope=singleton)
-        binder.bind(baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY,
-                    ClassProvider(DocumentTypeDao), scope=singleton)
-        binder.bind(baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
-                    ClassProvider(DocumentFileInfoDao), scope=singleton)
-        binder.bind(baseinjectorkeys.EVENT_DAO_KEY,
-                    ClassProvider(EventDao), scope=singleton)
-        binder.bind(baseinjectorkeys.DOCUMENT_DAO_KEY,
-                    ClassProvider(DocumentDao), scope=singleton)
-        binder.bind(baseinjectorkeys.RELATIONS_DAO_KEY,
-                    ClassProvider(DocumentEventRelationsDao), scope=singleton)
-        binder.bind(baseinjectorkeys.EVENT_TYPE_DAO_KEY,
-                    ClassProvider(EventTypeDao), scope=singleton)
-        binder.bind(baseinjectorkeys.EVENT_CROSS_REFERENCES_DAO_KEY,
-                    ClassProvider(EventCrossreferencesDao), scope=singleton)
+                    ClassProvider(DocumentFilterExpressionBuilder),
+                    scope=singleton)
+        binder.bind(baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY,
+                    ClassProvider(EventFilterExpressionBuilder),
+                    scope=singleton)
 
     @provider
     @singleton
     @inject
-    def create_database_engine(self,
-                               config_service:
-                               baseinjectorkeys.CONFIG_KEY) -> baseinjectorkeys.DB_ENGINE_KEY:
+    def create_database_engine(self, config_service: Config) -> Engine:
         '''
         Creates the database engine from configuration information
         '''

@@ -133,19 +133,19 @@ class FemPlakatExporter(PlakatExporter):
         self.titel = "Plakate zur Neuen Frauenbewegung\\linebreak{}(vor 1990 oder Entstehung nicht bestimmt)"
         PlakatExporter.open_file(self)
     
-    def filtered(self, record, events):
+    #def filtered(self, record, events):
 
-        if record.condition is not None and re.compile(r".*(199\d|20\d\d).*").match(record.condition):
-            return True
+    #    if record.condition is not None and re.compile(r".*(199\d|20\d\d).*").match(record.condition):
+    #        return True
         
-        if len(events) == 0:
-            return False
+    #    if len(events) == 0:
+    #        return False
         
-        for event in events:
-            if event.id < 1990000000:
-                return False
+    #    for event in events:
+    #        if event.id < 1990000000:
+    #            return False
 
-        return True
+    #    return True
 
     def fetch_records(self):
 
@@ -158,5 +158,5 @@ class FemPlakatExporter(PlakatExporter):
 if __name__ == '__main__':
     
     injector = Injector([AlexBaseModule, DaoModule, ServiceModule])
-    exporter = injector.get(PlakatExporter)
+    exporter = injector.get(FemPlakatExporter)
     exporter.export_to_tex()
