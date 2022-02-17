@@ -67,6 +67,10 @@ class PlakatExporter:
         return self.dao.find(condition)
     
     def filtered(self, record, events):
+        '''
+        Returns True, if the record should be filtered out
+        from the list. Override in subclasses.
+        '''
 
         return False
 
@@ -127,26 +131,10 @@ class PlakatExporter:
 
 
 class FemPlakatExporter(PlakatExporter):
-    
-    def open_file(self):
+    '''
+    Katalog für Plakate zur Frauenbewegung.
+    '''
         
-        self.titel = "Plakate zur Neuen Frauenbewegung\\linebreak{}(vor 1990 oder Entstehung nicht bestimmt)"
-        PlakatExporter.open_file(self)
-    
-    #def filtered(self, record, events):
-
-    #    if record.condition is not None and re.compile(r".*(199\d|20\d\d).*").match(record.condition):
-    #        return True
-        
-    #    if len(events) == 0:
-    #        return False
-        
-    #    for event in events:
-    #        if event.id < 1990000000:
-    #            return False
-
-    #    return True
-
     def fetch_records(self):
 
         condition = and_(DOCUMENT_TABLE.c.doktyp == 9, 
@@ -154,9 +142,29 @@ class FemPlakatExporter(PlakatExporter):
                              DOCUMENT_TABLE.c.standort.like("23%")))
         return self.dao.find(condition)
     
+class FemOldPlakatExporter(FemPlakatExporter):
+    '''
+    Katalog für alle Plakate vor 1990 oder ohne Information
+    '''
+    
+    def filtered(self, record, events):
+
+        if record.condition is not None and re.compile(r".*(199\d|20\d\d).*").match(record.condition):
+            return True
+        
+        if len(events) == 0:
+            return False
+        
+        for event in events:
+            if event.id < 1990000000:
+                return False
+
+        return True
+
 
 if __name__ == '__main__':
     
     injector = Injector([AlexBaseModule, DaoModule, ServiceModule])
-    exporter = injector.get(FemPlakatExporter)
+    exporter = injector.get(FemOldPlakatExporter)
+    exporter.title = "Plakate zur Frauenbewegung\\linebreak{}vor 1990"
     exporter.export_to_tex()
