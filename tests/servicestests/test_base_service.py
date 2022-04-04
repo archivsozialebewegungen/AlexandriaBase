@@ -8,12 +8,11 @@ import unittest
 from unittest.mock import MagicMock
 
 from alex_test_utils import TestEnvironment, MODE_SIMPLE
-from alexandriabase.daos import DaoModule, EventDao
+from alexandriabase import baseinjectorkeys, AlexBaseModule
+from alexandriabase.daos import DaoModule
 from alexandriabase.domain import Entity
 from alexandriabase.services import ServiceModule
 from alexandriabase.services import BaseRecordService
-from sqlalchemy.engine.base import Engine
-from alexandriabase import baseinjectorkeys
 
 
 class TestDaoModuleConfiguration(unittest.TestCase):
@@ -27,14 +26,13 @@ class TestDaoModuleConfiguration(unittest.TestCase):
     def test_configuration(self):
         
         injector = Injector([
+                        AlexBaseModule(),
                         DaoModule(),
                         ServiceModule()
                          ])
 
         # Try to get the database engine, which is the crucial part
-        injector.get(Engine)
-        
-        injector.get(EventDao)
+        injector.get(baseinjectorkeys.DB_ENGINE_KEY)
         
         # Test getting pdf handlers
         injector.get(baseinjectorkeys.PDF_HANDLERS_KEY)

@@ -7,7 +7,6 @@ Created on 18.10.2015
 from xml.dom.minidom import parse, getDOMImplementation
 
 import os
-from injector import singleton
 
 
 class NoSuchConfigValue(Exception):
@@ -19,7 +18,6 @@ class NoSuchConfigValue(Exception):
         super().__init__(message)
         self.message = message
 
-@singleton
 class Config:
     '''
     Class for handling xml configuration files.

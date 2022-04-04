@@ -36,9 +36,7 @@ from sqlalchemy.sql.expression import text, update, select
 
 from alexandriabase import _, baseinjectorkeys, fontdir
 from alexandriabase.base_exceptions import NoSuchEntityException
-from alexandriabase.daos import CURRENT_VERSION, REGISTRY_TABLE, CreatorDao,\
-    DocumentFileInfoDao, DocumentDao, DocumentTypeDao, EventDao,\
-    EventCrossreferencesDao, EventTypeDao, DocumentEventRelationsDao
+from alexandriabase.daos import CURRENT_VERSION, REGISTRY_TABLE
 from alexandriabase.domain import PaginatedResult, Document, Tree, EventType,\
     EventTypeIdentifier, Event
 
@@ -46,8 +44,6 @@ from alexandriabase.domain import PaginatedResult, Document, Tree, EventType,\
 # pylint: disable=wrong-import-order
 # pylint: disable=ungrouped-imports
 from PyPDF2 import utils
-from sqlalchemy.engine.base import Engine
-from alexandriabase.config import Config
 def read_inline_image_patch(self, stream):
     '''
     Overrides the _readInlineImage method in the
@@ -253,14 +249,13 @@ class BaseRecordService():
         result.entities = self.dao.find(condition, page, page_size)
         return result
 
-@singleton
 class CreatorService(object):
     '''
     Service to manage the creators in the database.
     '''
 
     @inject
-    def __init__(self, creator_dao: CreatorDao):
+    def __init__(self, creator_dao: baseinjectorkeys.CREATOR_DAO_KEY):
         '''
         Uses the creator dao for database access
         '''
@@ -320,14 +315,13 @@ class UpdateFrom0_3(BaseUpdate):
         self.connection.execute(text(self.dialect_specifics[self.dialect]))
         self.set_version('0.4')
 
-@singleton
 class DatabaseUpgradeService():
     '''
     Handles updating the database
     '''
 
     @inject
-    def __init__(self, db_engine: Engine):
+    def __init__(self, db_engine: baseinjectorkeys.DB_ENGINE_KEY):
         '''
         Constructor
         '''
@@ -462,182 +456,7 @@ class TextObject(object):
                 counter += 1
         paragraphs.append("".join(lines))
         return paragraphs
-
-@singleton
-class DocumentFileManager(object):
-    '''
-    A simple class to manage document files. It provider
-    all the methods needed to create, delete or find files
-    referenced by a document file info.
-    It also supports handling of derived files (pdfs, thumbnails etc.)
-    '''
-    # pylint: disable=no-self-use
-    @inject
-    def __init__(self, config_service: Config,
-                 document_file_info_dao: DocumentFileInfoDao):
-        '''
-        Constructor reads the configuration from the config_service
-        '''
-        self.base_dir = config_service.document_dir
-        self.archives = config_service.archive_dirs
-        self.document_file_info_dao = document_file_info_dao
-        self.path_handler = {THUMBNAIL: self._get_thumb_path,
-                             DISPLAY_IMAGE: self._get_display_path,
-                             DOCUMENT_PDF: self._get_pdf_path}
-        self.logger = logging.getLogger(
-            "alexandriabase.services.documentfilemanager.DocumentFileManager")
-
-    def delete_file(self, document_file_info):
-        '''
-        Does not physically delete files but appends their file name
-        with .deleted
-        '''
-        file_path = self.get_file_path(document_file_info)
-        shutil.move(file_path, "%s.deleted" % file_path)
-
-    def add_file(self, file_path, document_file_info):
-        '''
-        Adds a file to the DOCUMENTBASEDIR, renaming it according
-        to the information in the document file info and deletes
-        the original file
-        '''
-        directory_path = self._create_type_dir_path(document_file_info)
-        if not os.path.exists(directory_path):
-            os.makedirs(directory_path)
-        shutil.copy(file_path, os.path.join(directory_path, document_file_info.get_file_name()))
-        os.remove(file_path)
-
-    def get_file_path(self, document_file_info):
-        '''
-        Searches in the BASEDIR and then in the ARCHIVES for the
-        referenced file. Raises a DocumentFileNotFound exception
-        if not found.
-        '''
-        self.logger.debug("Searching for file %s", document_file_info)
-        basedir_path = self._create_basedir_path(document_file_info)
         
-        self.logger.debug("Searching in %s", basedir_path)
-        if os.path.isfile(basedir_path):
-            return basedir_path
-
-        expanded_short_path = self._create_archive_sub_path(document_file_info)
-
-        for archive in self.archives:
-            archive_path = os.path.join(archive, expanded_short_path)
-            self.logger.debug("Searching in %s", archive_path)
-            if os.path.isfile(archive_path):
-                return archive_path
-        raise DocumentFileNotFound(document_file_info)
-
-    def get_generated_file_path(self, document_file_info, generation_type):
-        '''
-        Returns the path of the generated file belonging to the master
-        file given in the document_file_info of the given generation_type
-        '''
-        
-        return self.path_handler[generation_type](document_file_info)
-        
-    def _get_thumb_path(self, document_file_info):
-        '''
-        Returns the location of the thumbnail path
-        '''
-        return self._get_path(document_file_info, "thumb", "png")
-    
-    def _get_display_path(self, document_file_info):
-        '''
-        Returns the location of the display image path
-        '''
-        return self._get_path(document_file_info, "display", "png")
-
-    def _get_pdf_path(self, document_file_info):
-        '''
-        Returns the location of the pdf file path
-        '''
-        if document_file_info.id == document_file_info.document_id:
-            file_info = document_file_info
-        else:
-            file_info = self.document_file_info_dao.get_by_id(document_file_info.document_id)
-        return self._get_path(file_info, "pdf", "pdf")
-
-    def _get_path(self, document_file_info, subdir, extension):
-        '''
-        Use regular expressions to manipulate the master file
-        path for derived files
-        '''
-        file_path = self.get_file_path(document_file_info)
-        ftype = document_file_info.filetype
-        subdir_path = re.sub(r"/%s/(?=\d{8}\.%s)" % (ftype, ftype),
-                             r"/%s/%s/" % (ftype, subdir),
-                             file_path)
-        return re.sub(r"\.%s$" % ftype, ".%s" % extension, subdir_path)
-    
-    def get_generated_file(self, document_file_info, generation_type):
-        '''
-        Returns the file as bytes if it exists. May throw a FileNotFound exception.
-        '''
-        
-        path = self.get_generated_file_path(document_file_info, generation_type)
-        file = open(path, mode="rb")
-        content = file.read()
-        file.close()
-        return content
-        
-    def add_generated_file(self, byte_buffer, document_file_info, generation_type):
-        '''
-        Add the generated file at its appropriate place.
-        '''
-        
-        path = self.get_generated_file_path(document_file_info, generation_type)
-        path_dir = os.path.dirname(path) 
-        try:
-            os.makedirs(path_dir)
-        except FileExistsError:
-            pass
-        file = open(path, mode="wb")
-        file.write(byte_buffer)
-        file.close()
-    
-    def delete_generated_file(self, document_file_info, generation_type):
-        '''
-        Removes the generated file if it exists. Otherwise does nothing.
-        Also nothing happens when the original document just has is a single
-        pdf file and there is a request to delete the generated pdf file for
-        the document.
-        '''
-        try:
-            os.unlink(self.get_generated_file_path(document_file_info, generation_type))
-        except FileNotFoundError:
-            pass
-    
-    def _create_basedir_path(self, document_file_info):
-        '''
-        Creates a path for the file in the base dir
-        '''
-        return os.path.join(self.base_dir,
-                            self._create_path_with_typedir(document_file_info))
-
-    def _create_type_dir_path(self, document_file_info):
-        return os.path.join(self.base_dir,
-                            document_file_info.filetype)
-
-    def _create_path_with_typedir(self, document_file_info):
-        '''
-        Helper function for path construction
-        '''
-        return os.path.join(
-            document_file_info.filetype,
-            document_file_info.get_file_name())
-
-    def _create_archive_sub_path(self, document_file_info):
-        '''
-        When documents are archived, then they are stored in 1000 blocks.
-        The first 1000 files (0-999) go into the directory 1000, then next
-        1000 files (1000-1999) into the directory 2000 and so on.
-        '''
-        dirnumber = ((document_file_info.id + 1000) // 1000) * 1000
-        return os.path.join("%d" % dirnumber,
-                            self._create_path_with_typedir(document_file_info))
-@singleton        
 class TextPdfHandler(object):
     '''
     Handler class for text files. Converts text into paragraph
@@ -647,7 +466,7 @@ class TextPdfHandler(object):
     _re_empty_line = re.compile(r"^\s+$")
     
     @inject
-    def __init__(self, document_file_manager: DocumentFileManager):
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY):
         '''
         Constructor
         '''
@@ -696,14 +515,13 @@ class TextPdfHandler(object):
             story.append(Paragraph(par, self.normal_style))
         return story
 
-@singleton
 class GraphicsPdfHandler(object):
     '''
     Handler for graphic formats.
     '''
     
     @inject
-    def __init__(self, document_file_manager: DocumentFileManager):
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY):
         '''
         Constructor
         '''
@@ -739,7 +557,6 @@ class GraphicsPdfHandler(object):
             story.append(PdfImage(file, width_in_inch * inch, height_in_inch * inch))
         return story
 
-@singleton
 class DocumentPdfGenerationService(object):
     '''
     Service to create a pdf file from the systematic database
@@ -749,8 +566,8 @@ class DocumentPdfGenerationService(object):
 
     @inject
     def __init__(self,
-                 document_file_info_dao: DocumentFileInfoDao,
-                 document_file_manager: DocumentFileManager,
+                 document_file_info_dao: baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
+                 document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
                  pdf_handlers: baseinjectorkeys.PDF_HANDLERS_KEY):
         '''
         Constructor
@@ -881,32 +698,7 @@ class ImageExtractionFailure(Exception):
     def __init__(self, file_path, return_value):
         self.file_path = file_path
         self.return_value = return_value
-
-@singleton
-class DocumentFileImageGenerator:
-    '''
-    Main class for image generation. There are handlers for different
-    file types to create an image (there should be more). Throws a
-    NoImageGeneratorError if it is no possible to create an image from
-    a file.
-    '''
-    
-    @inject
-    def __init__(self, image_generators: baseinjectorkeys.IMAGE_GENERATORS_KEY):
         
-        self.image_generators = image_generators
-        
-    def generate_image(self, document_file_info):
-        '''
-        Invokes the appropriate handler for the file type to generate an image
-        '''
-        try:
-            return self.image_generators[document_file_info.filetype].\
-                generate_image(document_file_info)
-        except KeyError:
-            raise NoImageGeneratorError(document_file_info.filetype)
-
-@singleton        
 class FileProvider():
     '''
     Provides the content of different derived files for documents. The
@@ -916,10 +708,10 @@ class FileProvider():
     # pylint: disable=no-self-use
     @inject
     def __init__(self,
-                 document_file_manager: DocumentFileManager, 
-                 document_file_info_dao: DocumentFileInfoDao,
-                 document_pdf_generator: DocumentPdfGenerationService,
-                 document_file_image_generator: DocumentFileImageGenerator):
+                 document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY, 
+                 document_file_info_dao: baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
+                 document_pdf_generator: baseinjectorkeys.DOCUMENT_PDF_GENERATOR_KEY,
+                 document_file_image_generator: baseinjectorkeys.DOCUMENT_FILE_IMAGE_GENERATOR_KEY):
         
         self.document_file_manager = document_file_manager
         self.document_file_info_dao = document_file_info_dao
@@ -1020,6 +812,29 @@ class FileProvider():
         draw.text((10, 180), document_file_info.get_file_name(), font=font, fill=0)
         return img
         
+class DocumentFileImageGenerator:
+    '''
+    Main class for image generation. There are handlers for different
+    file types to create an image (there should be more). Throws a
+    NoImageGeneratorError if it is no possible to create an image from
+    a file.
+    '''
+    
+    @inject
+    def __init__(self, image_generators: baseinjectorkeys.IMAGE_GENERATORS_KEY):
+        
+        self.image_generators = image_generators
+        
+    def generate_image(self, document_file_info):
+        '''
+        Invokes the appropriate handler for the file type to generate an image
+        '''
+        try:
+            return self.image_generators[document_file_info.filetype].\
+                generate_image(document_file_info)
+        except KeyError:
+            raise NoImageGeneratorError(document_file_info.filetype)
+        
 class GraphicsImageGenerator:
     '''
     A simple image "generator" for graphics file: Just opens the graphic
@@ -1027,7 +842,7 @@ class GraphicsImageGenerator:
     '''
  
     @inject
-    def __init__(self, document_file_manager: DocumentFileManager):   
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY):   
         self.document_file_manager = document_file_manager
         
     def generate_image(self, document_file_info):
@@ -1035,8 +850,89 @@ class GraphicsImageGenerator:
         Opens the file as PIL image
         '''
         return Image.open(self.document_file_manager.get_file_path(document_file_info))
+        
+class PdfImageGenerator:
+    '''
+    Create an image from a pdf file
+    '''
+    
+    @inject
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
+                 pdf_image_extractor: baseinjectorkeys.PDF_IMAGE_EXTRACTOR_KEY):
+        self.document_file_manager = document_file_manager
+        self.pdf_image_extractor = pdf_image_extractor
+        
+    def generate_image(self, document_file_info):
+        '''
+        Uses the pdf image extractor to get an image from the pdf file
+        '''
+        file_path = self.document_file_manager.get_file_path(document_file_info)
+        return self.pdf_image_extractor.extract_image(file_path)
 
-@singleton
+class TextImageGenerator:
+    '''
+    To convert a text file into an image, this handler first
+    creates a pdf file from the text file and then extracts
+    an image from the pdf file.
+    '''
+    
+    @inject
+    def __init__(self,
+                 pdf_image_extractor: baseinjectorkeys.PDF_IMAGE_EXTRACTOR_KEY,
+                 pdf_generator: baseinjectorkeys.DOCUMENT_PDF_GENERATOR_KEY):
+        self.pdf_image_extractor = pdf_image_extractor
+        self.pdf_generator = pdf_generator
+        
+    def generate_image(self, document_file_info):
+        '''
+        Writes a temporary pdf file and then uses the pdf image extractor
+        to create an image from the pdf
+        '''
+        pdf_from_text = self.pdf_generator.generate_file_pdf(document_file_info)
+        tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix='.pdf', delete=False)
+        tmp_file.write(pdf_from_text)
+        tmp_file.close()
+        image = self.pdf_image_extractor.extract_image(tmp_file.name)
+        os.unlink(tmp_file.name)
+        return image
+    
+class MovieImageGenerator:
+    '''
+    Generates an image from a movie file 4 seconds into the movie
+    '''
+    
+    @inject
+    def __init__(self, document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY):   
+        self.document_file_manager = document_file_manager
+        
+    def generate_image(self, document_file_info):
+        '''
+        Uses ffmpeg to write a frame of the given video as jpg file that then will
+        be read into a PIL image and the file removed. 
+        '''
+        
+        
+        input_file_name = self.document_file_manager.get_file_path(document_file_info)
+        tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix='.jpg', delete=False)
+        tmp_file.close()
+        output_file_name = tmp_file.name
+        stdio = open(os.devnull, 'wb')
+        call(["ffmpeg",
+              "-itsoffset", "-4",
+              "-i", input_file_name,
+              "-vcodec", "mjpeg",
+              "-vframes", "1",
+              "-an", 
+              "-f", "rawvideo",
+              "-y",
+              output_file_name
+             ],
+             stdout=stdio,
+             stderr=stdio)
+        image = Image.open(output_file_name)
+        os.unlink(output_file_name)
+        return image
+    
 class PdfImageExtractor(object):
     '''
     Creates PIL images from pdf files. First tries to extract
@@ -1280,153 +1176,180 @@ class PdfImageExtractor(object):
             if '/Subtype' in x_object[obj] and x_object[obj]['/Subtype'] == '/Image':
                 image_objects.append(x_object[obj])
         return image_objects
-        
-class PdfImageGenerator:
+
+class DocumentFileManager(object):
     '''
-    Create an image from a pdf file
+    A simple class to manage document files. It provider
+    all the methods needed to create, delete or find files
+    referenced by a document file info.
+    It also supports handling of derived files (pdfs, thumbnails etc.)
     '''
-    
+    # pylint: disable=no-self-use
     @inject
-    def __init__(self, document_file_manager: DocumentFileManager,
-                 pdf_image_extractor: PdfImageExtractor):
-        self.document_file_manager = document_file_manager
-        self.pdf_image_extractor = pdf_image_extractor
-        
-    def generate_image(self, document_file_info):
+    def __init__(self, config_service: baseinjectorkeys.CONFIG_KEY,
+                 document_file_info_dao: baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY):
         '''
-        Uses the pdf image extractor to get an image from the pdf file
+        Constructor reads the configuration from the config_service
         '''
-        file_path = self.document_file_manager.get_file_path(document_file_info)
-        return self.pdf_image_extractor.extract_image(file_path)
+        self.base_dir = config_service.document_dir
+        self.archives = config_service.archive_dirs
+        self.document_file_info_dao = document_file_info_dao
+        self.path_handler = {THUMBNAIL: self._get_thumb_path,
+                             DISPLAY_IMAGE: self._get_display_path,
+                             DOCUMENT_PDF: self._get_pdf_path}
+        self.logger = logging.getLogger(
+            "alexandriabase.services.documentfilemanager.DocumentFileManager")
 
-@singleton
-class TextImageGenerator:
-    '''
-    To convert a text file into an image, this handler first
-    creates a pdf file from the text file and then extracts
-    an image from the pdf file.
-    '''
-    
-    @inject
-    def __init__(self,
-                 pdf_image_extractor: PdfImageExtractor,
-                 pdf_generator: DocumentPdfGenerationService):
-        self.pdf_image_extractor = pdf_image_extractor
-        self.pdf_generator = pdf_generator
-        
-    def generate_image(self, document_file_info):
+    def delete_file(self, document_file_info):
         '''
-        Writes a temporary pdf file and then uses the pdf image extractor
-        to create an image from the pdf
+        Does not physically delete files but appends their file name
+        with .deleted
         '''
-        pdf_from_text = self.pdf_generator.generate_file_pdf(document_file_info)
-        tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix='.pdf', delete=False)
-        tmp_file.write(pdf_from_text)
-        tmp_file.close()
-        image = self.pdf_image_extractor.extract_image(tmp_file.name)
-        os.unlink(tmp_file.name)
-        return image
+        file_path = self.get_file_path(document_file_info)
+        shutil.move(file_path, "%s.deleted" % file_path)
 
-@singleton    
-class MovieImageGenerator:
-    '''
-    Generates an image from a movie file 4 seconds into the movie
-    '''
-    
-    @inject
-    def __init__(self, document_file_manager: DocumentFileManager):   
-        self.document_file_manager = document_file_manager
-        
-    def generate_image(self, document_file_info):
+    def add_file(self, file_path, document_file_info):
         '''
-        Uses ffmpeg to write a frame of the given video as jpg file that then will
-        be read into a PIL image and the file removed. 
+        Adds a file to the DOCUMENTBASEDIR, renaming it according
+        to the information in the document file info and deletes
+        the original file
         '''
-        
-        
-        input_file_name = self.document_file_manager.get_file_path(document_file_info)
-        tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix='.jpg', delete=False)
-        tmp_file.close()
-        output_file_name = tmp_file.name
-        stdio = open(os.devnull, 'wb')
-        call(["ffmpeg",
-              "-itsoffset", "-4",
-              "-i", input_file_name,
-              "-vcodec", "mjpeg",
-              "-vframes", "1",
-              "-an", 
-              "-f", "rawvideo",
-              "-y",
-              output_file_name
-             ],
-             stdout=stdio,
-             stderr=stdio)
-        image = Image.open(output_file_name)
-        os.unlink(output_file_name)
-        return image
+        directory_path = self._create_type_dir_path(document_file_info)
+        if not os.path.exists(directory_path):
+            os.makedirs(directory_path)
+        shutil.copy(file_path, os.path.join(directory_path, document_file_info.get_file_name()))
+        os.remove(file_path)
 
-@singleton    
-class FileFormatService:
-    '''
-    Check service for file types.
-    
-    Checks if the file type is supported, and when it is an
-    image file, determines the resolution and checks if it is
-    allowed. 
-    
-    The service may be configured overwriting the properties
-    supported_formats, format_aliases, resolution_handlers and
-    allowed resolutions 
-    '''
-    @inject
-    def __init__(self, config: Config):
-        self.supported_formats = config.filetypes
-        self.format_aliases = config.filetypealiases
+    def get_file_path(self, document_file_info):
+        '''
+        Searches in the BASEDIR and then in the ARCHIVES for the
+        referenced file. Raises a DocumentFileNotFound exception
+        if not found.
+        '''
+        self.logger.debug("Searching for file %s", document_file_info)
+        basedir_path = self._create_basedir_path(document_file_info)
         
-        # TODO: Also put these options into the configuration
-        self.resolution_handlers = {'tif': get_graphic_file_resolution,
-                                    'jpg': get_graphic_file_resolution,
-                                    'png': get_graphic_file_resolution,
-                                    'gif': get_gif_file_resolution}
-        self.allowed_resolutions = {'tif': [300, 400]}
+        self.logger.debug("Searching in %s", basedir_path)
+        if os.path.isfile(basedir_path):
+            return basedir_path
 
-    def get_format_and_resolution(self, file):
-        '''
-        Determines the file format and, if it
-        is a graphics format, the resolution.
-        '''
-        fileformat = self._get_file_format(file)
-        resolution = self._get_file_resolution(file, fileformat)
-        return fileformat, resolution
-    
-    def _get_file_format(self, file):
-        '''
-        Determines the format and checks if it is supported.
-        If not, an UnsupportedFileFormat exception is raised.
-        '''
-        # pylint: disable=unused-variable
-        filename, file_extension = os.path.splitext(file) # @UnusedVariable
-        fileformat = file_extension[1:].lower()
-        if fileformat in self.format_aliases:
-            fileformat = self.format_aliases[fileformat]
-        if not fileformat in self.supported_formats:
-            raise UnsupportedFileFormat(fileformat)
-        return fileformat
-    
-    def _get_file_resolution(self, file, fileformat):
-        '''
-        Determines the file resolution (if appropriate). Raises
-        an UnsupportedFileResolution exception, if it violates
-        the configured constraints.
-        '''
-        resolution = None
-        if fileformat in self.resolution_handlers:
-            resolution = self.resolution_handlers[fileformat](file)
-        if fileformat in self.allowed_resolutions:
-            if not resolution in self.allowed_resolutions[fileformat]:
-                raise UnsupportedFileResolution(fileformat, resolution)
-        return resolution
+        expanded_short_path = self._create_archive_sub_path(document_file_info)
 
+        for archive in self.archives:
+            archive_path = os.path.join(archive, expanded_short_path)
+            self.logger.debug("Searching in %s", archive_path)
+            if os.path.isfile(archive_path):
+                return archive_path
+        raise DocumentFileNotFound(document_file_info)
+
+    def get_generated_file_path(self, document_file_info, generation_type):
+        '''
+        Returns the path of the generated file belonging to the master
+        file given in the document_file_info of the given generation_type
+        '''
+        
+        return self.path_handler[generation_type](document_file_info)
+        
+    def _get_thumb_path(self, document_file_info):
+        '''
+        Returns the location of the thumbnail path
+        '''
+        return self._get_path(document_file_info, "thumb", "png")
+    
+    def _get_display_path(self, document_file_info):
+        '''
+        Returns the location of the display image path
+        '''
+        return self._get_path(document_file_info, "display", "png")
+
+    def _get_pdf_path(self, document_file_info):
+        '''
+        Returns the location of the pdf file path
+        '''
+        if document_file_info.id == document_file_info.document_id:
+            file_info = document_file_info
+        else:
+            file_info = self.document_file_info_dao.get_by_id(document_file_info.document_id)
+        return self._get_path(file_info, "pdf", "pdf")
+
+    def _get_path(self, document_file_info, subdir, extension):
+        '''
+        Use regular expressions to manipulate the master file
+        path for derived files
+        '''
+        file_path = self.get_file_path(document_file_info)
+        ftype = document_file_info.filetype
+        subdir_path = re.sub(r"/%s/(?=\d{8}\.%s)" % (ftype, ftype),
+                             r"/%s/%s/" % (ftype, subdir),
+                             file_path)
+        return re.sub(r"\.%s$" % ftype, ".%s" % extension, subdir_path)
+    
+    def get_generated_file(self, document_file_info, generation_type):
+        '''
+        Returns the file as bytes if it exists. May throw a FileNotFound exception.
+        '''
+        
+        path = self.get_generated_file_path(document_file_info, generation_type)
+        file = open(path, mode="rb")
+        content = file.read()
+        file.close()
+        return content
+        
+    def add_generated_file(self, byte_buffer, document_file_info, generation_type):
+        '''
+        Add the generated file at its appropriate place.
+        '''
+        
+        path = self.get_generated_file_path(document_file_info, generation_type)
+        path_dir = os.path.dirname(path) 
+        try:
+            os.makedirs(path_dir)
+        except FileExistsError:
+            pass
+        file = open(path, mode="wb")
+        file.write(byte_buffer)
+        file.close()
+    
+    def delete_generated_file(self, document_file_info, generation_type):
+        '''
+        Removes the generated file if it exists. Otherwise does nothing.
+        Also nothing happens when the original document just has is a single
+        pdf file and there is a request to delete the generated pdf file for
+        the document.
+        '''
+        try:
+            os.unlink(self.get_generated_file_path(document_file_info, generation_type))
+        except FileNotFoundError:
+            pass
+    
+    def _create_basedir_path(self, document_file_info):
+        '''
+        Creates a path for the file in the base dir
+        '''
+        return os.path.join(self.base_dir,
+                            self._create_path_with_typedir(document_file_info))
+
+    def _create_type_dir_path(self, document_file_info):
+        return os.path.join(self.base_dir,
+                            document_file_info.filetype)
+
+    def _create_path_with_typedir(self, document_file_info):
+        '''
+        Helper function for path construction
+        '''
+        return os.path.join(
+            document_file_info.filetype,
+            document_file_info.get_file_name())
+
+    def _create_archive_sub_path(self, document_file_info):
+        '''
+        When documents are archived, then they are stored in 1000 blocks.
+        The first 1000 files (0-999) go into the directory 1000, then next
+        1000 files (1000-1999) into the directory 2000 and so on.
+        '''
+        dirnumber = ((document_file_info.id + 1000) // 1000) * 1000
+        return os.path.join("%d" % dirnumber,
+                            self._create_path_with_typedir(document_file_info))
 
 class DocumentService(BaseRecordService):
     '''
@@ -1436,13 +1359,13 @@ class DocumentService(BaseRecordService):
 
     @inject
     def __init__(self,
-                 dokument_dao: DocumentDao,
-                 document_file_info_dao: DocumentFileInfoDao,
-                 document_file_manager: DocumentFileManager,
-                 document_type_dao: DocumentTypeDao,
-                 document_file_provider: FileProvider,
-                 ereignis_dao: EventDao,
-                 file_format_service: FileFormatService,
+                 dokument_dao: baseinjectorkeys.DOCUMENT_DAO_KEY,
+                 document_file_info_dao: baseinjectorkeys.DOCUMENT_FILE_INFO_DAO_KEY,
+                 document_file_manager: baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
+                 document_type_dao: baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY,
+                 document_file_provider: baseinjectorkeys.DOCUMENT_FILE_PROVIDER,
+                 ereignis_dao: baseinjectorkeys.EVENT_DAO_KEY,
+                 file_format_service: baseinjectorkeys.FILE_FORMAT_SERVICE,
                  filter_expression_builder:
                  baseinjectorkeys.DOCUMENT_FILTER_EXPRESSION_BUILDER_KEY):
         # pylint: disable=too-many-arguments
@@ -1613,14 +1536,13 @@ class DocumentService(BaseRecordService):
             updated_list.append(self._update_resolution(file_info))
         return updated_list
 
-@singleton
 class DocumentTypeService(object):
     '''
     classdocs
     '''
 
     @inject
-    def __init__(self, document_type_dao: DocumentTypeDao):
+    def __init__(self, document_type_dao: baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY):
         '''
         Constructor
         '''
@@ -1654,7 +1576,6 @@ class DocumentTypeService(object):
         '''
         return self.document_type_dao.get_by_id(doc_type_id)
 
-@singleton
 class EventService(BaseRecordService):
     '''
     Service for event handling. Most of the calls are just
@@ -1663,10 +1584,10 @@ class EventService(BaseRecordService):
 
     @inject
     def __init__(self,
-                 ereignis_dao: EventDao,
+                 ereignis_dao: baseinjectorkeys.EVENT_DAO_KEY,
                  filter_expression_builder: baseinjectorkeys.EVENT_FILTER_EXPRESSION_BUILDER_KEY,
-                 event_crossreferences_dao: EventCrossreferencesDao,
-                 event_type_dao: EventTypeDao):
+                 event_crossreferences_dao: baseinjectorkeys.EVENT_CROSS_REFERENCES_DAO_KEY,
+                 event_type_dao: baseinjectorkeys.EVENT_TYPE_DAO_KEY):
         BaseRecordService.__init__(self, ereignis_dao, filter_expression_builder)
         self.event_crossreferences_dao = event_crossreferences_dao
         self.event_type_dao = event_type_dao
@@ -1744,7 +1665,67 @@ class EventService(BaseRecordService):
 
         return Tree(entities)
 
-@singleton
+class FileFormatService:
+    '''
+    Check service for file types.
+    
+    Checks if the file type is supported, and when it is an
+    image file, determines the resolution and checks if it is
+    allowed. 
+    
+    The service may be configured overwriting the properties
+    supported_formats, format_aliases, resolution_handlers and
+    allowed resolutions 
+    '''
+    @inject
+    def __init__(self, config: baseinjectorkeys.CONFIG_KEY):
+        self.supported_formats = config.filetypes
+        self.format_aliases = config.filetypealiases
+        
+        # TODO: Also put these options into the configuration
+        self.resolution_handlers = {'tif': get_graphic_file_resolution,
+                                    'jpg': get_graphic_file_resolution,
+                                    'png': get_graphic_file_resolution,
+                                    'gif': get_gif_file_resolution}
+        self.allowed_resolutions = {'tif': [300, 400]}
+
+    def get_format_and_resolution(self, file):
+        '''
+        Determines the file format and, if it
+        is a graphics format, the resolution.
+        '''
+        fileformat = self._get_file_format(file)
+        resolution = self._get_file_resolution(file, fileformat)
+        return fileformat, resolution
+    
+    def _get_file_format(self, file):
+        '''
+        Determines the format and checks if it is supported.
+        If not, an UnsupportedFileFormat exception is raised.
+        '''
+        # pylint: disable=unused-variable
+        filename, file_extension = os.path.splitext(file) # @UnusedVariable
+        fileformat = file_extension[1:].lower()
+        if fileformat in self.format_aliases:
+            fileformat = self.format_aliases[fileformat]
+        if not fileformat in self.supported_formats:
+            raise UnsupportedFileFormat(fileformat)
+        return fileformat
+    
+    def _get_file_resolution(self, file, fileformat):
+        '''
+        Determines the file resolution (if appropriate). Raises
+        an UnsupportedFileResolution exception, if it violates
+        the configured constraints.
+        '''
+        resolution = None
+        if fileformat in self.resolution_handlers:
+            resolution = self.resolution_handlers[fileformat](file)
+        if fileformat in self.allowed_resolutions:
+            if not resolution in self.allowed_resolutions[fileformat]:
+                raise UnsupportedFileResolution(fileformat, resolution)
+        return resolution
+
 class ReferenceService:
     '''
     Service for handling references to the main records.
@@ -1752,9 +1733,9 @@ class ReferenceService:
     
     @inject
     def __init__(self,
-                 event_dao: EventDao, 
-                 document_dao: DocumentDao, 
-                 references_dao: DocumentEventRelationsDao):
+                 event_dao: baseinjectorkeys.EVENT_DAO_KEY, 
+                 document_dao: baseinjectorkeys.DOCUMENT_DAO_KEY, 
+                 references_dao: baseinjectorkeys.RELATIONS_DAO_KEY):
         '''
         Used for injection.
         '''
@@ -1799,51 +1780,51 @@ class ServiceModule(Module):
     Injector module for the services.
     '''
     
-    #def configure(self, binder):
+    def configure(self, binder):
         #dao_module = DaoModule()
         #dao_module.configure(binder)
-        #binder.bind(baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
-        #            ClassProvider(DocumentFileManager), scope=singleton)
-        #binder.bind(baseinjectorkeys.DOCUMENT_PDF_GENERATOR_KEY,
-        #            ClassProvider(DocumentPdfGenerationService), scope=singleton)
-        #binder.bind(baseinjectorkeys.GRAPHICS_PDF_HANDLER_KEY,
-        #            ClassProvider(GraphicsPdfHandler), scope=singleton)
-        #binder.bind(baseinjectorkeys.TEXT_PDF_HANDLER_KEY,
-        #            ClassProvider(TextPdfHandler), scope=singleton)
-        #binder.bind(baseinjectorkeys.EVENT_SERVICE_KEY,
-        #            ClassProvider(EventService), scope=singleton)
-        #binder.bind(baseinjectorkeys.DOCUMENT_SERVICE_KEY,
-        #            ClassProvider(DocumentService), scope=singleton)
-        #binder.bind(baseinjectorkeys.DOCUMENT_TYPE_SERVICE_KEY,
-        #            ClassProvider(DocumentTypeService), scope=singleton)
-        #binder.bind(baseinjectorkeys.REFERENCE_SERVICE_KEY,
-        #            ClassProvider(ReferenceService), scope=singleton)
-        #binder.bind(baseinjectorkeys.FILE_FORMAT_SERVICE,
-        #            ClassProvider(FileFormatService), scope=singleton)
-        #binder.bind(baseinjectorkeys.CREATOR_SERVICE_KEY,
-        #            ClassProvider(CreatorService), scope=singleton)
-        #binder.bind(baseinjectorkeys.DATABASE_UPGRADE_SERVICE_KEY,
-        #            ClassProvider(DatabaseUpgradeService), scope=singleton)
-        #binder.bind(baseinjectorkeys.DOCUMENT_FILE_IMAGE_GENERATOR_KEY,
-        #            ClassProvider(DocumentFileImageGenerator), scope=singleton)
-        #binder.bind(baseinjectorkeys.GRAPHICS_IMAGE_GENERATOR_KEY,
-        #            ClassProvider(GraphicsImageGenerator), scope=singleton)
-        #binder.bind(baseinjectorkeys.TEXT_IMAGE_GENERATOR_KEY,
-        #            ClassProvider(TextImageGenerator), scope=singleton)
-        #binder.bind(baseinjectorkeys.PDF_IMAGE_GENERATOR_KEY,
-        #            ClassProvider(PdfImageGenerator), scope=singleton)
-        #binder.bind(baseinjectorkeys.MOVIE_IMAGE_GENERATOR_KEY,
-        #            ClassProvider(MovieImageGenerator), scope=singleton)
-        #binder.bind(baseinjectorkeys.PDF_IMAGE_EXTRACTOR_KEY,
-        #            ClassProvider(PdfImageExtractor), scope=singleton)
-        #binder.bind(baseinjectorkeys.DOCUMENT_FILE_PROVIDER,
-        #            ClassProvider(FileProvider), scope=singleton)
+        binder.bind(baseinjectorkeys.DOCUMENT_FILE_MANAGER_KEY,
+                    ClassProvider(DocumentFileManager), scope=singleton)
+        binder.bind(baseinjectorkeys.DOCUMENT_PDF_GENERATOR_KEY,
+                    ClassProvider(DocumentPdfGenerationService), scope=singleton)
+        binder.bind(baseinjectorkeys.GRAPHICS_PDF_HANDLER_KEY,
+                    ClassProvider(GraphicsPdfHandler), scope=singleton)
+        binder.bind(baseinjectorkeys.TEXT_PDF_HANDLER_KEY,
+                    ClassProvider(TextPdfHandler), scope=singleton)
+        binder.bind(baseinjectorkeys.EVENT_SERVICE_KEY,
+                    ClassProvider(EventService), scope=singleton)
+        binder.bind(baseinjectorkeys.DOCUMENT_SERVICE_KEY,
+                    ClassProvider(DocumentService), scope=singleton)
+        binder.bind(baseinjectorkeys.DOCUMENT_TYPE_SERVICE_KEY,
+                    ClassProvider(DocumentTypeService), scope=singleton)
+        binder.bind(baseinjectorkeys.REFERENCE_SERVICE_KEY,
+                    ClassProvider(ReferenceService), scope=singleton)
+        binder.bind(baseinjectorkeys.FILE_FORMAT_SERVICE,
+                    ClassProvider(FileFormatService), scope=singleton)
+        binder.bind(baseinjectorkeys.CREATOR_SERVICE_KEY,
+                    ClassProvider(CreatorService), scope=singleton)
+        binder.bind(baseinjectorkeys.DATABASE_UPGRADE_SERVICE_KEY,
+                    ClassProvider(DatabaseUpgradeService), scope=singleton)
+        binder.bind(baseinjectorkeys.DOCUMENT_FILE_IMAGE_GENERATOR_KEY,
+                    ClassProvider(DocumentFileImageGenerator), scope=singleton)
+        binder.bind(baseinjectorkeys.GRAPHICS_IMAGE_GENERATOR_KEY,
+                    ClassProvider(GraphicsImageGenerator), scope=singleton)
+        binder.bind(baseinjectorkeys.TEXT_IMAGE_GENERATOR_KEY,
+                    ClassProvider(TextImageGenerator), scope=singleton)
+        binder.bind(baseinjectorkeys.PDF_IMAGE_GENERATOR_KEY,
+                    ClassProvider(PdfImageGenerator), scope=singleton)
+        binder.bind(baseinjectorkeys.MOVIE_IMAGE_GENERATOR_KEY,
+                    ClassProvider(MovieImageGenerator), scope=singleton)
+        binder.bind(baseinjectorkeys.PDF_IMAGE_EXTRACTOR_KEY,
+                    ClassProvider(PdfImageExtractor), scope=singleton)
+        binder.bind(baseinjectorkeys.DOCUMENT_FILE_PROVIDER,
+                    ClassProvider(FileProvider), scope=singleton)
 
     @provider
     @inject
     def provide_pdf_handlers(self, 
-                             graphics_handler: GraphicsPdfHandler,
-                             text_handler: TextPdfHandler
+                             graphics_handler: baseinjectorkeys.GRAPHICS_PDF_HANDLER_KEY,
+                             text_handler: baseinjectorkeys.TEXT_PDF_HANDLER_KEY
                             ) -> baseinjectorkeys.PDF_HANDLERS_KEY:
         '''
         Returns the handlers to create pdf representations for certain
@@ -1859,10 +1840,14 @@ class ServiceModule(Module):
     @provider
     @inject
     def provide_image_generators(self,
-                                 graphics_image_generator: GraphicsImageGenerator,
-                                 text_image_generator: TextImageGenerator,
-                                 pdf_image_generator: PdfImageGenerator,
-                                 movie_image_generator: MovieImageGenerator
+                                 graphics_image_generator:
+                                 baseinjectorkeys.GRAPHICS_IMAGE_GENERATOR_KEY,
+                                 text_image_generator:
+                                 baseinjectorkeys.TEXT_IMAGE_GENERATOR_KEY,
+                                 pdf_image_generator:
+                                 baseinjectorkeys.PDF_IMAGE_GENERATOR_KEY,
+                                 movie_image_generator:
+                                 baseinjectorkeys.MOVIE_IMAGE_GENERATOR_KEY
                                 ) -> baseinjectorkeys.IMAGE_GENERATORS_KEY:
         '''
         Returns the handlers for graphic images
