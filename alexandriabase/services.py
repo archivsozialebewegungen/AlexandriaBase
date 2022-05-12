@@ -1859,4 +1859,6 @@ class ServiceModule(Module):
                 'gif': graphics_image_generator,
                 'txt': text_image_generator,
                 'pdf': pdf_image_generator,
-                'mpg': movie_image_generator}
+                'mpg': movie_image_generator,
+                'mp4': movie_image_generator,
+                }

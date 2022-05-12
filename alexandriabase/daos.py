@@ -394,7 +394,7 @@ class EntityDao(GenericDao):
         if filter_expression is not None:
             subquery = subquery.where(filter_expression)
         query = select([self.table])\
-            .where(self.primary_key == subquery)  # @UndefinedVariable
+            .where(self.primary_key == subquery.scalar_subquery())  # @UndefinedVariable
             
         return self._get_one_or_none(query)
 
