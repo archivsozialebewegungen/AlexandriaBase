@@ -18,6 +18,7 @@ import re
 def tex_sanitizing(text: str) -> str:
     
     text = text.replace("&", "\\&")
+    text = text.replace("_", "\\_")
     text = text.replace("#", "\\#")
     return text
 
@@ -141,6 +142,18 @@ class FemPlakatExporter(PlakatExporter):
                          or_(DOCUMENT_TABLE.c.standort.like("7%"),
                              DOCUMENT_TABLE.c.standort.like("23%")))
         return self.dao.find(condition)
+
+class AntiAKWPlakatExporter(PlakatExporter):
+    '''
+    Katalog für Plakate zur Frauenbewegung.
+    '''
+        
+    def fetch_records(self):
+
+        condition = and_(DOCUMENT_TABLE.c.doktyp == 9, 
+                         DOCUMENT_TABLE.c.standort.like("12%"))
+        return self.dao.find(condition)
+    
     
 class FemOldPlakatExporter(FemPlakatExporter):
     '''
@@ -160,11 +173,23 @@ class FemOldPlakatExporter(FemPlakatExporter):
                 return False
 
         return True
+    
+class SpecialExporter(PlakatExporter):
+    
+    def fetch_records(self):
+
+        walpurgisnacht_list = [7315, 7319, 7544, 7550, 7551, 23036, 26620, 27586]
+        achter_maerz_list = [26537, 9292, 7121, 23043, 7543, 9292, 22042, 22955, 22956, 22958, 23014, 23044, 26239, 27600, 27619, 27717]
+        paragraph_218_list = [14858, 22072, 23006, 26588, 27902, 23071, 23064]
+        condition = and_(DOCUMENT_TABLE.c.doktyp == 9, or_(DOCUMENT_TABLE.c.hauptnr.in_(walpurgisnacht_list), DOCUMENT_TABLE.c.beschreibung.ilike('%alpuris%')))
+        return self.dao.find(condition)
+
 
 
 if __name__ == '__main__':
     
     injector = Injector([AlexBaseModule, DaoModule, ServiceModule])
-    exporter = injector.get(FemOldPlakatExporter)
-    exporter.title = "Plakate zur Frauenbewegung\\linebreak{}vor 1990"
+
+    exporter = injector.get(AntiAKWPlakatExporter)
+    exporter.title = "Plakate zur Anti-AKW- und Ökologiebewegung"
     exporter.export_to_tex()
