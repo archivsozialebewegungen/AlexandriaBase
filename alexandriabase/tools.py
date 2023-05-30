@@ -36,10 +36,14 @@ class PlakatExporter:
         self.file_manager = file_manager
         self.file_provider = file_provider
         self.reference_service = reference_service
-        
         self.titel = "Plakate im ASB"
         
-       
+        self.configure()
+        
+    def configure(self):
+
+        pass        
+               
     def export_to_tex(self):
     
         self.open_file()
@@ -54,13 +58,13 @@ class PlakatExporter:
             return
         
         self.file.write("\n\n\\section*{Dokumentnr. %d}" % record.id)
+        self.print_img(record.id)
         self.file.write("\n\nBeschreibung: %s" % tex_sanitizing(record.description))
         if record.condition is not None and record.condition.strip() != "":
             self.file.write("\n\nZusätzliche Infos: %s" % tex_sanitizing(record.condition))
 
         self.print_events(events)
             
-        self.print_img(record.id)
 
     def fetch_records(self):
 
@@ -154,12 +158,26 @@ class AntiAKWPlakatExporter(PlakatExporter):
                          DOCUMENT_TABLE.c.standort.like("12%"))
         return self.dao.find(condition)
     
+class HausbesetzungenPlakatExporter(PlakatExporter):
+    '''
+    Katalog für Plakate zur Hausbesetzerbewegung
+    '''
+    def configure(self):
+
+        self.titel = "Plakate zur Hausbesetzerbewegung"
+
+        
+    def fetch_records(self):
+
+        condition = and_(DOCUMENT_TABLE.c.doktyp == 9, 
+                         DOCUMENT_TABLE.c.standort.like("14%"))
+        return self.dao.find(condition)
     
 class FemOldPlakatExporter(FemPlakatExporter):
     '''
     Katalog für alle Plakate vor 1990 oder ohne Information
     '''
-    
+
     def filtered(self, record, events):
 
         if record.condition is not None and re.compile(r".*(199\d|20\d\d).*").match(record.condition):
@@ -174,6 +192,29 @@ class FemOldPlakatExporter(FemPlakatExporter):
 
         return True
     
+class FemNeuPlakatExporter(FemPlakatExporter):
+    '''
+    Katalog für alle Plakate ab 2000
+    '''
+    
+    def configure(self):
+
+        self.titel = "Feministische Plakate der 2000er"
+    
+    def filtered(self, record, events):
+
+        if record.condition is not None and re.compile(r".*(20\d\d).*").match(record.condition):
+            return False
+        
+        if len(events) == 0:
+            return True
+        
+        for event in events:
+            if event.id > 2000000000:
+                return False
+
+        return True
+
 class SpecialExporter(PlakatExporter):
     
     def fetch_records(self):
@@ -190,6 +231,5 @@ if __name__ == '__main__':
     
     injector = Injector([AlexBaseModule, DaoModule, ServiceModule])
 
-    exporter = injector.get(AntiAKWPlakatExporter)
-    exporter.title = "Plakate zur Anti-AKW- und Ökologiebewegung"
+    exporter = injector.get(FemNeuPlakatExporter)
     exporter.export_to_tex()
