@@ -5,7 +5,7 @@ Created on 15.11.2021
 '''
 from alexandriabase.daos import DocumentDao, DaoModule, DOCUMENT_TABLE,\
     DocumentFileInfoDao
-from injector import Injector, inject
+from injector import Injector, inject, singleton
 from alexandriabase import AlexBaseModule
 from alexandriabase.services import ServiceModule, DocumentFileManager,\
     DocumentFileNotFound, THUMBNAIL, FileProvider, ReferenceService
@@ -22,6 +22,7 @@ def tex_sanitizing(text: str) -> str:
     text = text.replace("#", "\\#")
     return text
 
+@singleton
 class PlakatExporter:
     
     @inject
