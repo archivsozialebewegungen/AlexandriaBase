@@ -70,7 +70,8 @@ DOCUMENT_TABLE = Table(
     Column('aufnahme', Date),
     Column('aenderung', Date),
     Column('doktyp', Integer, ForeignKey('doktyp.id')),
-    Column('res', Integer))
+    Column('res', Integer),
+    Column('doppel', Integer))
 
 DOCUMENT_EVENT_REFERENCE_TABLE = Table(
     'dverweis',
@@ -764,6 +765,7 @@ class DocumentDao(EntityDao):
         dokument.keywords = row[self.table.c.keywords]
         dokument.creation_date = row[self.table.c.aufnahme]
         dokument.change_date = row[self.table.c.aenderung]
+        dokument.doppel = row[self.table.c.doppel]
         erfasser_id = row[self.table.c.erfasser_id]
         dokument.erfasser = self.creator_dao.get_by_id(erfasser_id)
         dokument.document_type = self.document_type_dao.get_by_id(row[self.table.c.doktyp])
@@ -777,6 +779,7 @@ class DocumentDao(EntityDao):
                zustand=document.condition,
                keywords=document.keywords,
                doktyp=document.document_type.id,
+               doppel=document.doppel,
                aenderung=func.now())
         self.connection.execute(update_statement)
         return document
@@ -794,6 +797,7 @@ class DocumentDao(EntityDao):
                    keywords=document.keywords,
                    erfasser_id=document.erfasser.id,
                    doktyp=document.document_type.id,
+                   doppel=document.doppel,
                    aufnahme=func.now(),
                    aenderung=func.now())
         self.connection.execute(insert_statement)

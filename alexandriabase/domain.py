@@ -425,6 +425,7 @@ class Document(MainTableEntity):
         self.condition = ''
         self.keywords = ''
         self.document_type = None
+        self.doppel = 0
 
     def __str__(self):
         if not self.id:

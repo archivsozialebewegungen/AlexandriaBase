@@ -44,6 +44,7 @@ class TestDocumentDao(DatabaseBaseTest):
         self.assertEqual(dokument.change_date, date(2015, 1, 13))
         self.assertEqual(dokument.condition, 'Guter Zustand')
         self.assertEqual(dokument.keywords, 'Suchwort')
+        self.assertEqual(dokument.doppel, 1)
 
     def test_get_by_id(self):
         dokument = self.dao.get_by_id(4)
@@ -259,6 +260,7 @@ class TestDocumentDao(DatabaseBaseTest):
         document.condition = "New state"
         document.keywords = "New keywords"
         document.standort = "1.2.3.IV"
+        document.doppel = 42
         document.document_type = self.injector.get(baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY).get_by_id(17)
 
         self.dao.save(document)
@@ -269,6 +271,7 @@ class TestDocumentDao(DatabaseBaseTest):
         self.assertEqual(document.description, "New description")
         self.assertEqual(document.condition, "New state")
         self.assertEqual(document.keywords, "New keywords")
+        self.assertEqual(document.doppel, 42)
 
     def testDeleteDocument(self):
         document = self.dao.get_first()
@@ -282,6 +285,7 @@ class TestDocumentDao(DatabaseBaseTest):
         document.description = "My description"
         document.keywords = "My keywords"
         document.condition = "My document state"
+        document.doppel = 42
         document.erfasser = self.injector.get(baseinjectorkeys.CREATOR_DAO_KEY).get_by_id(2)
         document.document_type = self.injector.get(baseinjectorkeys.DOCUMENT_TYPE_DAO_KEY).get_by_id(5)
         self.dao.save(document)
@@ -292,6 +296,7 @@ class TestDocumentDao(DatabaseBaseTest):
         self.assertEqual("My description", document.description)
         self.assertEqual("My keywords", document.keywords)
         self.assertEqual("My document state", document.condition)
+        self.assertEqual(42, document.doppel)
         self.assertEqual(3, document.erfasser.id)
         self.assertEqual("Flugblatt", document.document_type.description)
         self.assertTrue(document.change_date)
