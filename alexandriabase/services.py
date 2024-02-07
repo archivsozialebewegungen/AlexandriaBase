@@ -988,7 +988,7 @@ class PdfImageExtractor(object):
             return self._extract_using_ghostscript(path)
             
         try:
-            page_text = page0.extractText()
+            page_text = page0.extract_text()
         except Exception as error:
             self.logger.debug("Trying ghostscript due " +
                               "to error extracting text from pdf (%s).", error)
@@ -1045,7 +1045,8 @@ class PdfImageExtractor(object):
                             stdout=stdio,
                             stderr=stdio)
         
-        if return_value != 0:
+        # Ghostscript may return 0 although extraction may not have succeeded
+        if return_value != 0 or not os.path.exists(path):
             # pylint: disable=bare-except
             try:
                 os.unlink(path)

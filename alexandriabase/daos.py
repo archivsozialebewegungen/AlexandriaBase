@@ -422,7 +422,7 @@ class EntityDao(GenericDao):
         subquery = subquery.where(condition)
 
         query = select([self.table])\
-            .where(self.primary_key == subquery)  # @UndefinedVariable
+            .where(self.primary_key == subquery.scalar_subquery())  # @UndefinedVariable
         entity = self._get_one_or_none(query)
         
         if not entity:

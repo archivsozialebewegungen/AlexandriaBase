@@ -175,20 +175,23 @@ class PdfImageExtractorTests(unittest.TestCase):
         
     def test_all_sample_files(self):
         
+        unreadable_files = ('PYPDF2_PAGE_READERROR.pdf',)
+        
         for filename in os.listdir(self.dir):
-            if filename == 'GHOSTSCRIPT_ERROR.pdf':
+            if filename in unreadable_files:
                 continue
             img = self.extractor.extract_image(os.path.join(self.dir, filename))
             file_buffer = BytesIO()
             img.save(file_buffer, 'png')
             self.assertEqual(b'\x89PNG\r\n', file_buffer.getvalue()[0:6])
         
-        expected_exception = False
-        try:
-            img = self.extractor.extract_image(os.path.join(self.dir, 'GHOSTSCRIPT_ERROR.pdf'))
-        except ImageExtractionFailure:
-            expected_exception = True
-        self.assertTrue(expected_exception)
+        for filename in unreadable_files:
+            expected_exception = False
+            try:
+                img = self.extractor.extract_image(os.path.join(self.dir, filename))
+            except ImageExtractionFailure:
+                expected_exception = True
+            self.assertTrue(expected_exception)
     
 class DocumentFileManagerTests(unittest.TestCase):
 
