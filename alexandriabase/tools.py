@@ -232,5 +232,5 @@ if __name__ == '__main__':
     
     injector = Injector([AlexBaseModule, DaoModule, ServiceModule])
 
-    exporter = injector.get(FemNeuPlakatExporter)
+    exporter = injector.get(AntiAKWPlakatExporter)
     exporter.export_to_tex()
