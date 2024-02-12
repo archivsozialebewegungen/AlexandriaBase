@@ -21,7 +21,7 @@ from sqlalchemy.sql.sqltypes import Integer, String, Date
 from sqlalchemy.engine import create_engine
 from sqlalchemy.pool import StaticPool
 
-CURRENT_VERSION = '0.4'
+CURRENT_VERSION = '0.5'
 
 ALEXANDRIA_METADATA = MetaData()
 
