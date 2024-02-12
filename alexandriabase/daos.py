@@ -71,7 +71,8 @@ DOCUMENT_TABLE = Table(
     Column('aenderung', Date),
     Column('doktyp', Integer, ForeignKey('doktyp.id')),
     Column('res', Integer),
-    Column('doppel', Integer))
+    Column('doppel', Integer),
+    Column('aufbewahrung', String))
 
 DOCUMENT_EVENT_REFERENCE_TABLE = Table(
     'dverweis',
@@ -766,6 +767,10 @@ class DocumentDao(EntityDao):
         dokument.creation_date = row[self.table.c.aufnahme]
         dokument.change_date = row[self.table.c.aenderung]
         dokument.doppel = row[self.table.c.doppel]
+        if dokument.aufbewahrung is not None:
+            dokument.aufbewahrung = row[self.table.c.aufbewahrung]
+        else:
+            dokument.aufbewahrung = ""
         erfasser_id = row[self.table.c.erfasser_id]
         dokument.erfasser = self.creator_dao.get_by_id(erfasser_id)
         dokument.document_type = self.document_type_dao.get_by_id(row[self.table.c.doktyp])
@@ -773,6 +778,10 @@ class DocumentDao(EntityDao):
 
     # pylint: disable=arguments-differ
     def _update(self, document):
+        aufbewahrung = ""
+        if document.aufbewahrung is not None and document.aufbewahrung.strip() != "":
+            aufbewahrung = document.aufbewahrung
+            
         update_statement = update(DOCUMENT_TABLE).\
         where(self.table.c.laufnr == document.id).\
         values(beschreibung=document.description,
@@ -780,6 +789,7 @@ class DocumentDao(EntityDao):
                keywords=document.keywords,
                doktyp=document.document_type.id,
                doppel=document.doppel,
+               aufbewahrung=aufbewahrung,
                aenderung=func.now())
         self.connection.execute(update_statement)
         return document
@@ -789,6 +799,9 @@ class DocumentDao(EntityDao):
         # pylint: disable=protected-access
         document._id = self._get_next_id()
         document.erfasser = self.creator_provider.creator
+        aufbewahrung = ""
+        if document.aufbewahrung is not None and document.aufbewahrung.strip() != "":
+            aufbewahrung = document.aufbewahrung
         insert_statement = insert(DOCUMENT_TABLE).\
             values(hauptnr=document.id,
                    laufnr=document.id,
@@ -798,6 +811,7 @@ class DocumentDao(EntityDao):
                    erfasser_id=document.erfasser.id,
                    doktyp=document.document_type.id,
                    doppel=document.doppel,
+                   aufbewahrung=aufbewahrung,
                    aufnahme=func.now(),
                    aenderung=func.now())
         self.connection.execute(insert_statement)
