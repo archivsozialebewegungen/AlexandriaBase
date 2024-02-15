@@ -767,7 +767,7 @@ class DocumentDao(EntityDao):
         dokument.creation_date = row[self.table.c.aufnahme]
         dokument.change_date = row[self.table.c.aenderung]
         dokument.doppel = row[self.table.c.doppel]
-        if dokument.aufbewahrung is not None:
+        if row[self.table.c.aufbewahrung] is not None:
             dokument.aufbewahrung = row[self.table.c.aufbewahrung]
         else:
             dokument.aufbewahrung = ""

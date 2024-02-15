@@ -236,6 +236,8 @@ class Config:
                       lambda self, value: self._set_string_value('dbname', value))
     filetypes = property(lambda self: self._get_list_value('filetypes'), 
                          lambda self, value: self._set_list_value('filetypes', value))
+    storage_locations = property(lambda self: self._get_list_value('storagelocations'), 
+                         lambda self, value: self._set_list_value('storagelocations', value))
     filetypealiases = property(lambda self: self._get_map_value('filetypealiases'), 
                                lambda self, value: self._set_map_value('filetypealiases', value))
     filetypeviewers = property(lambda self: self._get_map_value('filetypeviewers'), 
