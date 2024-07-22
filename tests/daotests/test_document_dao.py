@@ -219,6 +219,17 @@ class TestDocumentDao(DatabaseBaseTest):
         document = self.dao.get_next(document, filter_expression)
         self.assertEqual(1, document.id)
 
+    def testMultipleSignatureFiltering(self):
+        document_filter = DocumentFilter()
+        document_filter.signature = ["1.1", "1.2"]
+        filter_expression = self.document_filter_handler.create_filter_expression(document_filter)
+        document = self.dao.get_last(filter_expression)
+        self.assertEqual(11, document.id)
+        document = self.dao.get_next(document, filter_expression)
+        self.assertEqual(1, document.id)
+        documents = self.dao.find(filter_expression)
+        self.assertEqual(3, len(documents))
+
     def testFileTypeFiltering(self):
         document_filter = DocumentFilter()
         document_filter.filetype = "txt"

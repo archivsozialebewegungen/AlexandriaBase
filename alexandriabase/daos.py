@@ -689,9 +689,21 @@ class DocumentFilterExpressionBuilder(GenericFilterExpressionBuilder):
         '''
         if not document_filter.signature:
             return None
-        signature = document_filter.signature.upper()
-        return or_(self.table.c.standort == signature,
-                   self.table.c.standort.startswith("%s." % signature))
+        
+        # signature may be an array of signatures
+        signature_array = []
+        if type(document_filter.signature) is str:
+            signature_array.append(document_filter.signature.upper())
+        else:
+            for signature in document_filter.signature:
+                signature_array.append(signature.upper())
+        
+        expressions = []
+        for signature in signature_array:
+            expressions.append(self.table.c.standort == signature)
+            expressions.append(self.table.c.standort.startswith("%s." % signature))
+        
+        return or_(*expressions)
 
     def _build_filetype_expression(self, document_filter):
         '''
