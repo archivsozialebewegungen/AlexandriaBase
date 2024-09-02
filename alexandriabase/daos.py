@@ -155,9 +155,8 @@ def combine_expressions(expressions, method):
         return None
     if len(expressions) == 1:
         return expressions[0]
-    # pylint: disable=unnecessary-lambda
-    return reduce(lambda e1, e2: method(e1, e2), expressions)
-
+    else:
+        return method(*expressions)
 
 class NestedTransactionsException(Exception):
     '''
