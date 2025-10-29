@@ -75,7 +75,7 @@ class FileProviderTests(unittest.TestCase):
         
         pdf = self.file_provider.get_pdf(document)
         self.assertFalse(pdf is None)
-        self.assertEquals(b'%PDF-1.3', pdf[0:8])
+        self.assertEqual(b'%PDF-1.3', pdf[0:8])
         
         self.assertTrue(os.path.exists(cache_path))
         
@@ -83,7 +83,7 @@ class FileProviderTests(unittest.TestCase):
         
         thumbnail = self.file_provider.get_thumbnail(self.env.document_file_infos[1])
         
-        self.assertEquals(b'\x89PNG\r\n', thumbnail[0:6])
+        self.assertEqual(b'\x89PNG\r\n', thumbnail[0:6])
 
         thumbnail2 = self.document_file_manager.get_generated_file(self.env.document_file_infos[1], THUMBNAIL)
         
@@ -96,27 +96,27 @@ class FileProviderTests(unittest.TestCase):
         
         thumbnail = self.file_provider.get_thumbnail(self.env.document_file_infos[6])
         
-        self.assertEquals(b'\x89PNG\r\n', thumbnail[0:6])
+        self.assertEqual(b'\x89PNG\r\n', thumbnail[0:6])
 
 
     def test_thumbnail_generation_pdf(self):
 
         thumbnail = self.file_provider.get_thumbnail(self.env.document_file_infos[8])
         
-        self.assertEquals(b'\x89PNG\r\n', thumbnail[0:6])
+        self.assertEqual(b'\x89PNG\r\n', thumbnail[0:6])
 
     def test_thumbnail_generation_txt(self):
 
         thumbnail = self.file_provider.get_thumbnail(self.env.document_file_infos[11])
         
-        self.assertEquals(b'\x89PNG\r\n', thumbnail[0:6])
+        self.assertEqual(b'\x89PNG\r\n', thumbnail[0:6])
 
     @unittest.skipIf(os.path.basename(sys.argv[0]) == 'nosetests', "Can't run on travis because ffmpeg needs to be installed")
     def test_thumbnail_generation_mpg(self):
 
         thumbnail = self.file_provider.get_thumbnail(self.env.document_file_infos[13])
         
-        self.assertEquals(b'\x89PNG\r\n', thumbnail[0:6])
+        self.assertEqual(b'\x89PNG\r\n', thumbnail[0:6])
 
     def test_thumbnail_generation_unsupported_filetype(self):
 
@@ -131,14 +131,14 @@ class FileProviderTests(unittest.TestCase):
         document_file_info.filetype = 'xls'
         thumbnail = self.file_provider.get_thumbnail(document_file_info)
         
-        self.assertEquals(b'\x89PNG\r\n', thumbnail[0:6])
+        self.assertEqual(b'\x89PNG\r\n', thumbnail[0:6])
 
 
     def test_display_image_generation_tif(self):
         
         display_image = self.file_provider.get_display_image(self.env.document_file_infos[1])
         
-        self.assertEquals(b'\x89PNG\r\n', display_image[0:6])
+        self.assertEqual(b'\x89PNG\r\n', display_image[0:6])
 
         display_image2 = self.document_file_manager.get_generated_file(self.env.document_file_infos[1], DISPLAY_IMAGE)
         
@@ -159,7 +159,7 @@ class FileProviderTests(unittest.TestCase):
         document_file_info.filetype = 'xls'
         display_image = self.file_provider.get_display_image(document_file_info)
         
-        self.assertEquals(b'\x89PNG\r\n', display_image[0:6])
+        self.assertEqual(b'\x89PNG\r\n', display_image[0:6])
 
 #@unittest.skipUnless(os.path.basename(sys.argv[0]) == 'nosetests', "Running just on a complete test run")
 class PdfImageExtractorTests(unittest.TestCase):
