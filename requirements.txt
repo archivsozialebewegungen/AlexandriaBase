@@ -10,7 +10,7 @@ pluggy==1.6.0
 psycopg2==2.9.11
 Pygments==2.19.2
 PyPDF2==1.28.6
-pytest==8.4.2
+pytest==9.0.3
 reportlab==4.4.4
 SQLAlchemy==1.4.54
 typing==3.7.4.3
